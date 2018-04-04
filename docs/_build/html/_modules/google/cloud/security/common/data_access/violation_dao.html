@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.data_access.violation_dao &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.common.data_access.violation_dao</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Provides the data access object (DAO) for Organizations.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">import</span> <span class="nn">MySQLdb</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">db_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">violation_map</span> <span class="k">as</span> <span class="n">vm</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.sql_queries</span> <span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.sql_queries</span> <span class="kn">import</span> <span class="n">select_data</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ViolationDao"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.violation_dao.ViolationDao">[docs]</a><span class="k">class</span> <span class="nc">ViolationDao</span><span class="p">(</span><span class="n">dao</span><span class="o">.</span><span class="n">Dao</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data access object (DAO) for rule violations.&quot;&quot;&quot;</span>
+
+    <span class="n">violation_attribute_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;violation_hash&#39;</span><span class="p">,</span> <span class="s1">&#39;resource_type&#39;</span><span class="p">,</span> <span class="s1">&#39;resource_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rule_name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;rule_index&#39;</span><span class="p">,</span> <span class="s1">&#39;violation_type&#39;</span><span class="p">,</span> <span class="s1">&#39;violation_data&#39;</span><span class="p">,</span> <span class="s1">&#39;created_at_datetime&#39;</span><span class="p">]</span>
+    <span class="n">frozen_violation_attribute_list</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">violation_attribute_list</span><span class="p">)</span>
+    <span class="n">Violation</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Violation&#39;</span><span class="p">,</span> <span class="n">frozen_violation_attribute_list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ViolationDao.insert_violations"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.violation_dao.ViolationDao.insert_violations">[docs]</a>    <span class="k">def</span> <span class="nf">insert_violations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">violations</span><span class="p">,</span>
+                          <span class="n">snapshot_timestamp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import violations into database.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            violations (iterator): An iterator of RuleViolations.</span>
+<span class="sd">            snapshot_timestamp (str): The snapshot timestamp to associate</span>
+<span class="sd">                these violations with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A tuple of (int, list) containing the count of inserted</span>
+<span class="sd">                rows and a list of violations that encountered an error during</span>
+<span class="sd">                insert.</span>
+
+<span class="sd">        Raise:</span>
+<span class="sd">            MySQLError: is raised when the snapshot table can not be created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s1">&#39;violations&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Make sure to have a reasonable timestamp to use.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">snapshot_timestamp</span><span class="p">:</span>
+                <span class="n">snapshot_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_latest_snapshot_timestamp</span><span class="p">(</span>
+                    <span class="p">(</span><span class="s1">&#39;PARTIAL_SUCCESS&#39;</span><span class="p">,</span> <span class="s1">&#39;SUCCESS&#39;</span><span class="p">))</span>
+
+            <span class="c1"># Create the violations snapshot table.</span>
+            <span class="n">snapshot_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_snapshot_table</span><span class="p">(</span>
+                <span class="n">resource_name</span><span class="p">,</span> <span class="n">snapshot_timestamp</span><span class="p">)</span>
+        <span class="c1"># TODO: Remove this exception handling by moving the check for</span>
+        <span class="c1"># violations table outside of the scanners.</span>
+        <span class="k">except</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1050</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Violations table already exists: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">snapshot_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_snapshot_table_name</span><span class="p">(</span>
+                    <span class="n">resource_name</span><span class="p">,</span> <span class="n">snapshot_timestamp</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">db_errors</span><span class="o">.</span><span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">db_errors</span><span class="o">.</span><span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="n">created_at</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+
+        <span class="n">inserted_rows</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">violation_errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">violation</span> <span class="ow">in</span> <span class="n">violations</span><span class="p">:</span>
+            <span class="n">violation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Violation</span><span class="p">(</span>
+                <span class="n">violation_hash</span><span class="o">=</span><span class="n">_create_violation_hash</span><span class="p">(</span>
+                    <span class="n">violation</span><span class="p">[</span><span class="s1">&#39;resource_id&#39;</span><span class="p">],</span> <span class="n">violation</span><span class="p">[</span><span class="s1">&#39;violation_data&#39;</span><span class="p">]),</span>
+                <span class="n">resource_type</span><span class="o">=</span><span class="n">violation</span><span class="p">[</span><span class="s1">&#39;resource_type&#39;</span><span class="p">],</span>
+                <span class="n">resource_id</span><span class="o">=</span><span class="n">violation</span><span class="p">[</span><span class="s1">&#39;resource_id&#39;</span><span class="p">],</span>
+                <span class="n">rule_name</span><span class="o">=</span><span class="n">violation</span><span class="p">[</span><span class="s1">&#39;rule_name&#39;</span><span class="p">],</span>
+                <span class="n">rule_index</span><span class="o">=</span><span class="n">violation</span><span class="p">[</span><span class="s1">&#39;rule_index&#39;</span><span class="p">],</span>
+                <span class="n">violation_type</span><span class="o">=</span><span class="n">violation</span><span class="p">[</span><span class="s1">&#39;violation_type&#39;</span><span class="p">],</span>
+                <span class="n">violation_data</span><span class="o">=</span><span class="n">violation</span><span class="p">[</span><span class="s1">&#39;violation_data&#39;</span><span class="p">],</span>
+                <span class="n">created_at_datetime</span><span class="o">=</span><span class="n">created_at</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">formatted_violation</span> <span class="ow">in</span> <span class="n">_format_violation</span><span class="p">(</span><span class="n">violation</span><span class="p">,</span>
+                                                         <span class="n">resource_name</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">execute_sql_with_commit</span><span class="p">(</span>
+                        <span class="n">resource_name</span><span class="p">,</span>
+                        <span class="n">load_data</span><span class="o">.</span><span class="n">INSERT_VIOLATION</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">snapshot_table</span><span class="p">),</span>
+                        <span class="n">formatted_violation</span><span class="p">)</span>
+                    <span class="n">inserted_rows</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">except</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to insert violation </span><span class="si">%s</span><span class="s1"> due to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                 <span class="n">formatted_violation</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="n">violation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formatted_violation</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">inserted_rows</span><span class="p">,</span> <span class="n">violation_errors</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ViolationDao.get_all_violations"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.violation_dao.ViolationDao.get_all_violations">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_violations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">violation_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get all the violations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timestamp (str): The timestamp of the snapshot.</span>
+<span class="sd">            violation_type (str): The violation type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of dict of the violations data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">violation_type</span><span class="p">:</span>
+            <span class="n">resource_name</span> <span class="o">=</span> <span class="s1">&#39;all_violations&#39;</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">select_data</span><span class="o">.</span><span class="n">SELECT_ALL_VIOLATIONS</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resource_name</span> <span class="o">=</span> <span class="n">violation_type</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">select_data</span><span class="o">.</span><span class="n">SELECT_VIOLATIONS_BY_TYPE</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">violation_type</span><span class="p">,)</span>
+
+        <span class="n">violations_sql</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute_sql_with_fetch</span><span class="p">(</span>
+            <span class="n">resource_name</span><span class="p">,</span> <span class="n">violations_sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rows</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_format_violation</span><span class="p">(</span><span class="n">violation</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Violation formating stub that uses a map to call the formating</span>
+<span class="sd">    function for the resource.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        violation (iterator): An iterator of RuleViolations.</span>
+<span class="sd">        resource_name (str): String that defines a resource.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple of formatted violation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">formatted_output</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">VIOLATION_MAP</span><span class="p">[</span><span class="n">resource_name</span><span class="p">](</span><span class="n">violation</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">formatted_output</span>
+
+
+<div class="viewcode-block" id="map_by_resource"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.violation_dao.map_by_resource">[docs]</a><span class="k">def</span> <span class="nf">map_by_resource</span><span class="p">(</span><span class="n">violation_rows</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a map of violation types to violations of that resource.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        violation_rows (list): A list of dict of violation data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dict of violation types mapped to the list of corresponding</span>
+<span class="sd">            violation types, i.e. { resource =&gt; [violation_data...] }.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">v_by_type</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">v_data</span> <span class="ow">in</span> <span class="n">violation_rows</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">v_data</span><span class="p">[</span><span class="s1">&#39;violation_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">v_data</span><span class="p">[</span><span class="s1">&#39;violation_data&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Invalid violation data, unable to parse json for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="n">v_data</span><span class="p">[</span><span class="s1">&#39;violation_data&#39;</span><span class="p">])</span>
+
+        <span class="n">v_resource</span> <span class="o">=</span> <span class="n">vm</span><span class="o">.</span><span class="n">VIOLATION_RESOURCES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">v_data</span><span class="p">[</span><span class="s1">&#39;violation_type&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">v_resource</span><span class="p">:</span>
+            <span class="n">v_by_type</span><span class="p">[</span><span class="n">v_resource</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">v_by_type</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_create_violation_hash</span><span class="p">(</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">violation_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a hash of violation data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        resource_id (str): The id of the resource.</span>
+<span class="sd">        violation_data (dict): A violation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The resulting hex digest or &#39;&#39; if we can&#39;t successfully create</span>
+<span class="sd">        a hash.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: Intelligently choose from hashlib.algorithms_guaranteed if our</span>
+    <span class="c1"># desired one is not available.</span>
+    <span class="n">algorithm</span> <span class="o">=</span> <span class="s1">&#39;sha512&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">violation_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Cannot create hash for a violation with algorithm: &#39;</span>
+                     <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">violation_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">resource_id</span><span class="p">)</span> <span class="o">+</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">violation_data</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Cannot create hash for a violation: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">resource_id</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">violation_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

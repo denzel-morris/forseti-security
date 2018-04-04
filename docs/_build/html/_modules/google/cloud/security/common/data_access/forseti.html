@@ -1,0 +1,593 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.data_access.forseti &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.common.data_access.forseti</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot; Forseti Database Objects. &quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">String</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">Text</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">BigInteger</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">Date</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">desc</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">sessionmaker</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="kn">import</span> <span class="n">declarative_base</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql.elements</span> <span class="kn">import</span> <span class="n">literal_column</span>
+
+
+<span class="c1"># TODO: The next editor must remove this disable and correct issues.</span>
+<span class="c1"># pylint: disable=missing-type-doc,missing-return-type-doc,missing-return-doc</span>
+<span class="c1"># pylint: disable=missing-param-doc,missing-yield-doc,missing-yield-type-doc</span>
+
+
+<span class="n">BASE</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
+<span class="n">TABLE_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">PER_YIELD</span> <span class="o">=</span> <span class="mi">1024</span>
+
+<span class="c1"># pylint: disable=too-many-locals</span>
+<div class="viewcode-block" id="SnapshotState"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.forseti.SnapshotState">[docs]</a><span class="k">class</span> <span class="nc">SnapshotState</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Possible states for Forseti snapshots.&quot;&quot;&quot;</span>
+
+    <span class="n">SUCCESS</span> <span class="o">=</span> <span class="s2">&quot;SUCCESS&quot;</span>
+    <span class="n">RUNNING</span> <span class="o">=</span> <span class="s2">&quot;RUNNING&quot;</span>
+    <span class="n">FAILURE</span> <span class="o">=</span> <span class="s2">&quot;FAILURE&quot;</span>
+    <span class="n">PARTIAL_SUCCESS</span> <span class="o">=</span> <span class="s2">&quot;PARTIAL_SUCCESS&quot;</span>
+    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="s2">&quot;TIMEOUT&quot;</span></div>
+
+
+<div class="viewcode-block" id="Snapshot"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.forseti.Snapshot">[docs]</a><span class="k">class</span> <span class="nc">Snapshot</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a Forseti snapshot row.&quot;&quot;&quot;</span>
+
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;snapshot_cycles&#39;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Date</span><span class="p">)</span>
+    <span class="n">complete_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Date</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">schema_version</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+    <span class="n">cycle_timestamp</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;Snapshot(id=&#39;{}&#39;, version=&#39;{}&#39;, timestamp=&#39;{}&#39;)&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_table_names"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.forseti.create_table_names">[docs]</a><span class="k">def</span> <span class="nf">create_table_names</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">schema_version</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Forseti tables are namespaced via snapshot timestamp.</span>
+<span class="sd">       This function generates the appropriate classes to</span>
+<span class="sd">       abstract the access to a single snapshot.&quot;&quot;&quot;</span>
+
+    <span class="n">schema_number</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">schema_version</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">TABLE_CACHE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TABLE_CACHE</span><span class="p">[</span><span class="n">timestamp</span><span class="p">]</span>
+
+    <span class="k">class</span> <span class="nc">Project</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represtents a GCP project row under the organization.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;projects_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_number</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">project_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">lifecycle_state</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">parent_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">parent_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">raw_project</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+        <span class="n">create_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Date</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;Project(id=&#39;{}&#39;, project_name=&#39;{}&#39;)&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">ProjectPolicy</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a GCP project policy row under the organization.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;raw_project_iam_policies_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_number</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+        <span class="n">iam_policy</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;Policy(id=&#39;{}&#39;, type=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_number</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_resource_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return a reference to the resource in the form (type, id).&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="s1">&#39;project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_number</span>
+
+        <span class="k">def</span> <span class="nf">get_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return the corresponding IAM policy.&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iam_policy</span>
+
+    <span class="k">class</span> <span class="nc">OrganizationPolicy</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a GCP organization policy row.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;raw_org_iam_policies_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">org_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+        <span class="n">iam_policy</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;Policy(id=&#39;{}&#39;, type=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;organization&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">org_id</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_resource_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return a reference to the resource in the form (type, id)&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="s1">&#39;organization&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">org_id</span>
+
+        <span class="k">def</span> <span class="nf">get_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return the corresponding IAM policy.&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iam_policy</span>
+
+    <span class="k">class</span> <span class="nc">Bucket</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a GCS bucket item.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;buckets_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_number</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+        <span class="n">bucket_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">bucket_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">bucket_kind</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">bucket_storage_class</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">bucket_location</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">bucket_create_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Date</span><span class="p">)</span>
+        <span class="n">bucket_update_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Date</span><span class="p">)</span>
+        <span class="n">bucket_selflink</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">bucket_lifecycle_raw</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+        <span class="n">raw_bucket</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;Bucket(id=&#39;{}&#39;, name=&#39;{}&#39;, location=&#39;{}&#39;)&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bucket_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bucket_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bucket_location</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Organization</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a GCP organization.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;organizations_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="n">org_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">display_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">lifecycle_state</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">raw_org</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+        <span class="n">creation_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Date</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Organization(id=&#39;{}&#39;, name=&#39;{}&#39;, display_name=&#39;{}&#39;)&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">org_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">GroupMembers</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents Gsuite group membership.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;group_members_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">group_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+        <span class="n">member_role</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">128</span><span class="p">))</span>
+        <span class="n">member_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">128</span><span class="p">))</span>
+        <span class="n">member_status</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">128</span><span class="p">))</span>
+        <span class="n">member_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">128</span><span class="p">))</span>
+        <span class="n">member_email</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">128</span><span class="p">))</span>
+        <span class="n">raw_member</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;GroupMember(gid=&#39;{}&#39;, role=&#39;{}&#39;, email=&#39;{}&#39;)&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">member_role</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">member_email</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">member_status</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Groups</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a Gsuite group.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;groups_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">group_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">127</span><span class="p">))</span>
+        <span class="n">group_email</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">127</span><span class="p">))</span>
+        <span class="n">group_kind</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">127</span><span class="p">))</span>
+        <span class="n">direct_member_count</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+        <span class="n">raw_group</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Group(gid=&#39;{}&#39;, email=&#39;{}&#39;, kind=&#39;{}&#39;, members=&#39;{}&#39;)&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group_email</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group_kind</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">direct_member_count</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Folders</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a folder.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;folders_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="n">folder_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">display_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">lifecycle_state</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">parent_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">parent_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Folder(fid=&#39;{}&#39;, name=&#39;{}&#39;, display_name=&#39;{}&#39;)&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">folder_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">schema_number</span> <span class="o">&gt;=</span> <span class="mf">2.0</span><span class="p">:</span>
+        <span class="k">class</span> <span class="nc">FolderPolicy</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Represents a GCP folder policy row under the organization.&quot;&quot;&quot;</span>
+
+            <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;raw_folder_iam_policies_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">folder_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+            <span class="n">iam_policy</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+                <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;Policy(id=&#39;{}&#39;, type=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;folder&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">folder_id</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">get_resource_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Return a reference to the resource in the form (type, id).</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="k">return</span> <span class="s1">&#39;folder&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">folder_id</span>
+
+            <span class="k">def</span> <span class="nf">get_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Return the corresponding IAM policy.&quot;&quot;&quot;</span>
+
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iam_policy</span>
+
+    <span class="k">class</span> <span class="nc">CloudSqlInstances</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a Cloud SQL instance.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;cloudsql_instances_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_number</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">())</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;CloudSQL(id=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Instances</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a Cloud GCE instance.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;instances_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">service_accounts</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+        <span class="n">raw_instance</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Instance(id=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">InstanceGroups</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a Cloud GCE instance group.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;instance_groups_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">raw_instance_group</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Instance Group(id=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">BigqueryDatasets</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a Cloud Bigquery dataset.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;bigquery_datasets_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">raw_access_map</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Bigquery Dataset(id=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataset_id</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">BackendServices</span><span class="p">(</span><span class="n">BASE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents a Cloud Backend Service.&quot;&quot;&quot;</span>
+
+        <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;backend_services_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestamp</span>
+
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">BigInteger</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+        <span class="n">raw_backend_service</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">())</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;String representation.&quot;&quot;&quot;</span>
+
+            <span class="n">fmt_s</span> <span class="o">=</span> <span class="s2">&quot;&lt;Bigquery Dataset(id=&#39;{}&#39;, name=&#39;{}&#39;&gt;&quot;</span>
+            <span class="k">return</span> <span class="n">fmt_s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">supported_policies</span> <span class="o">=</span> <span class="p">[</span><span class="n">OrganizationPolicy</span><span class="p">,</span> <span class="n">ProjectPolicy</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">schema_number</span> <span class="o">&gt;=</span> <span class="mf">2.0</span><span class="p">:</span>
+        <span class="n">supported_policies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FolderPolicy</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">Organization</span><span class="p">,</span>
+              <span class="n">Folders</span><span class="p">,</span>
+              <span class="p">[(</span><span class="s1">&#39;projects&#39;</span><span class="p">,</span> <span class="n">Project</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;buckets&#39;</span><span class="p">,</span> <span class="n">Bucket</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;cloudsqlinstances&#39;</span><span class="p">,</span> <span class="n">CloudSqlInstances</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;instances&#39;</span><span class="p">,</span> <span class="n">Instances</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;instancegroups&#39;</span><span class="p">,</span> <span class="n">InstanceGroups</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;bigquerydatasets&#39;</span><span class="p">,</span> <span class="n">BigqueryDatasets</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;backendservices&#39;</span><span class="p">,</span> <span class="n">BackendServices</span><span class="p">)],</span>
+              <span class="n">supported_policies</span><span class="p">,</span>
+              <span class="p">[</span><span class="n">GroupMembers</span><span class="p">,</span> <span class="n">Groups</span><span class="p">])</span>
+    <span class="n">TABLE_CACHE</span><span class="p">[</span><span class="n">timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Importer"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.forseti.Importer">[docs]</a><span class="k">class</span> <span class="nc">Importer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Forseti data importer to iterate the inventory and policies.&quot;&quot;&quot;</span>
+
+    <span class="n">SUPPORTED_SCHEMAS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1.0&#39;</span><span class="p">,</span> <span class="s1">&#39;2.0&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_connect_string</span><span class="p">):</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">db_connect_string</span><span class="p">,</span> <span class="n">pool_recycle</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
+        <span class="n">BASE</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">engine</span>
+
+    <span class="k">def</span> <span class="nf">_table_exists_or_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">context_msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raises exception if table does not exists.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                table (object): Table to check for existence</span>
+<span class="sd">                context_msg (str): Additional information</span>
+<span class="sd">            Raises:</span>
+<span class="sd">                Exception: Indicate that the table does not exist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">table_name</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">__tablename__</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">has_table</span><span class="p">(</span><span class="n">table_name</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Table not found: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">context_msg</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;{}, hint: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">context_msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_latest_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find the latest snapshot from the database.</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                object: Forseti snapshot description table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Snapshot</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Snapshot</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">SnapshotState</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Snapshot</span><span class="o">.</span><span class="n">schema_version</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SUPPORTED_SCHEMAS</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Snapshot</span><span class="o">.</span><span class="n">start_time</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+            <span class="o">.</span><span class="n">first</span><span class="p">())</span>
+
+<div class="viewcode-block" id="Importer.__iter__"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.forseti.Importer.__iter__">[docs]</a>    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Main interface to get the data, returns assets and then policies.&quot;&quot;&quot;</span>
+
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_latest_snapshot</span><span class="p">()</span>
+
+        <span class="n">organization</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">tables</span><span class="p">,</span> <span class="n">policies</span><span class="p">,</span> <span class="n">group_membership</span> <span class="o">=</span> \
+            <span class="n">create_table_names</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">,</span>
+                               <span class="n">snapshot</span><span class="o">.</span><span class="n">schema_version</span><span class="p">)</span>
+
+        <span class="c1"># Organizations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_exists_or_raise</span><span class="p">(</span><span class="n">organization</span><span class="p">)</span>
+        <span class="n">forseti_org</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">organization</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+        <span class="k">yield</span> <span class="s2">&quot;organizations&quot;</span><span class="p">,</span> <span class="n">forseti_org</span>
+
+        <span class="c1"># Folders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_exists_or_raise</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span>
+        <span class="n">folder_set</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">folders</span><span class="o">.</span><span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;organization&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">all</span><span class="p">())</span>
+
+        <span class="k">while</span> <span class="n">folder_set</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folder_set</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="s1">&#39;folders&#39;</span><span class="p">,</span> <span class="n">folder</span>
+
+            <span class="n">folder_set</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">folders</span><span class="o">.</span><span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;folder&#39;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">folders</span><span class="o">.</span><span class="n">parent_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">folder_id</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folder_set</span><span class="p">]))</span>
+                <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">yield_per</span><span class="p">(</span><span class="n">PER_YIELD</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">res_type</span><span class="p">,</span> <span class="n">item</span>
+
+        <span class="c1"># Groups and membership</span>
+        <span class="n">membership</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="n">group_membership</span>
+        <span class="n">hint</span> <span class="o">=</span> <span class="s1">&#39;Did you enable Forseti group collection?&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_exists_or_raise</span><span class="p">(</span><span class="n">membership</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_exists_or_raise</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
+        <span class="n">query_groups</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_entities</span><span class="p">(</span><span class="n">literal_column</span><span class="p">(</span><span class="s2">&quot;&#39;GROUP&#39;&quot;</span><span class="p">),</span> <span class="n">groups</span><span class="o">.</span><span class="n">group_email</span><span class="p">))</span>
+        <span class="n">principals</span> <span class="o">=</span> <span class="n">query_groups</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">email</span> <span class="ow">in</span> <span class="n">principals</span><span class="o">.</span><span class="n">yield_per</span><span class="p">(</span><span class="n">PER_YIELD</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">email</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">membership</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">membership</span><span class="o">.</span><span class="n">group_id</span> <span class="o">==</span> <span class="n">groups</span><span class="o">.</span><span class="n">group_id</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">desc</span><span class="p">(</span><span class="n">membership</span><span class="o">.</span><span class="n">member_email</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">distinct</span><span class="p">())</span>
+
+        <span class="n">cur_member</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">member_groups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">member</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">yield_per</span><span class="p">(</span><span class="n">PER_YIELD</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">cur_member</span> <span class="ow">and</span> <span class="n">cur_member</span><span class="o">.</span><span class="n">member_email</span> <span class="o">!=</span> <span class="n">member</span><span class="o">.</span><span class="n">member_email</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cur_member</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="s1">&#39;membership&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">cur_member</span><span class="p">,</span> <span class="n">member_groups</span><span class="p">)</span>
+                    <span class="n">cur_member</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">member_groups</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">cur_member</span> <span class="o">=</span> <span class="n">member</span>
+            <span class="n">member_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">policy_table</span> <span class="ow">in</span> <span class="n">policies</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_table_exists_or_raise</span><span class="p">(</span><span class="n">policy_table</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">policy_table</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="s1">&#39;policy&#39;</span><span class="p">,</span> <span class="n">policy</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

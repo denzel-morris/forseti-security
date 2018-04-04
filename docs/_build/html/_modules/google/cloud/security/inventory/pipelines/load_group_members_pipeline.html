@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.inventory.pipelines.load_group_members_pipeline &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.inventory.pipelines.load_group_members_pipeline</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Pipeline to load GSuite Group members into Inventory.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">dao_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.gcp_api</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">api_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">inventory_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory.pipelines</span> <span class="kn">import</span> <span class="n">base_pipeline</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LoadGroupMembersPipeline"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.inventory.pipelines.html#google.cloud.security.inventory.pipelines.load_group_members_pipeline.LoadGroupMembersPipeline">[docs]</a><span class="k">class</span> <span class="nc">LoadGroupMembersPipeline</span><span class="p">(</span><span class="n">base_pipeline</span><span class="o">.</span><span class="n">BasePipeline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pipeline to load group members data into Inventory.&quot;&quot;&quot;</span>
+
+    <span class="n">RESOURCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;group_members&#39;</span>
+    <span class="n">GROUP_CHUNK_SIZE</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="k">def</span> <span class="nf">_fetch_groups_from_dao</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch the latest group ids previously stored in Cloud SQL.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of group ids.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            inventory_errors.LoadDataPipelineException: An error with loading</span>
+<span class="sd">                data has occurred.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">group_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dao</span><span class="o">.</span><span class="n">select_group_ids</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">dao_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">inventory_errors</span><span class="o">.</span><span class="n">LoadDataPipelineError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">group_ids</span>
+
+
+    <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_from_api</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield an iterator of loadable groups.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_from_api (tuple): (group_object, group_object_members)</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            iterable: Loadable groups as a per-group dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">group_member</span><span class="p">)</span> <span class="ow">in</span> <span class="n">resource_from_api</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">group_member</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="p">{</span><span class="s1">&#39;group_id&#39;</span><span class="p">:</span> <span class="n">group</span><span class="p">,</span>
+                       <span class="s1">&#39;member_kind&#39;</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;member_role&#39;</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;member_type&#39;</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;member_status&#39;</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;member_id&#39;</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;member_email&#39;</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;raw_member&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">member</span><span class="p">)}</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_ids</span><span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the membership for a list of given GSuite groups.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            group_ids (list): Group ids.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: (group_id, group_members) from the Admin SDK, e.g.</span>
+<span class="sd">                (string, [])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">group_members_map</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">group_id</span> <span class="ow">in</span> <span class="n">group_ids</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">group_members</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">get_group_members</span><span class="p">(</span><span class="n">group_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">api_errors</span><span class="o">.</span><span class="n">ApiExecutionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">inventory_errors</span><span class="o">.</span><span class="n">LoadDataPipelineError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="n">group_members_map</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">group_id</span><span class="p">,</span> <span class="n">group_members</span><span class="p">))</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrieved members from </span><span class="si">%s</span><span class="s1">: </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="n">group_id</span><span class="p">,</span>
+                         <span class="nb">len</span><span class="p">(</span><span class="n">group_members</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">group_members_map</span>
+
+<div class="viewcode-block" id="LoadGroupMembersPipeline.run"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.inventory.pipelines.html#google.cloud.security.inventory.pipelines.load_group_members_pipeline.LoadGroupMembersPipeline.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs the load GSuite account groups pipeline.&quot;&quot;&quot;</span>
+
+        <span class="n">group_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_groups_from_dao</span><span class="p">()</span>
+
+        <span class="c1"># TODO: Move this to g/c/s/c/gcp_api/common so it can be reused</span>
+        <span class="c1"># by other pipelines.</span>
+        <span class="k">def</span> <span class="nf">chunker</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Helper to chunk a list.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                seq (list): A list.</span>
+<span class="sd">                size (int): Integer of the desired chunk size.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                tuple: A tuple of the chunked seq.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="n">pos</span><span class="p">:</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">),</span> <span class="n">size</span><span class="p">))</span>
+
+        <span class="c1"># TODO: keep track of group_ids that are not retrieved/committed to db</span>
+        <span class="n">chunk_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">group_ids_in_chunk</span> <span class="ow">in</span> <span class="n">chunker</span><span class="p">(</span><span class="n">group_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_CHUNK_SIZE</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrieving a batch of group members in </span><span class="si">%s</span><span class="s1"> chunks.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                         <span class="s1">&#39;Current chunk count is: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">GROUP_CHUNK_SIZE</span><span class="p">,</span> <span class="n">chunk_counter</span><span class="p">)</span>
+            <span class="n">groups_members_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve</span><span class="p">(</span><span class="n">group_ids_in_chunk</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">groups_members_map</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">loadable_group_members</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">groups_members_map</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span> <span class="n">loadable_group_members</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_loaded_count</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No group members retrieved.&#39;</span><span class="p">)</span>
+            <span class="n">chunk_counter</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.notifier.pipelines package &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="google-cloud-security-notifier-pipelines-package">
+<h1>google.cloud.security.notifier.pipelines package<a class="headerlink" href="#google-cloud-security-notifier-pipelines-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.base_email_notification_pipeline">
+<span id="google-cloud-security-notifier-pipelines-base-email-notification-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.base_email_notification_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.base_email_notification_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Base email pipeline to perform notifications</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.base_email_notification_pipeline.</code><code class="descname">BaseEmailNotificationPipeline</code><span class="sig-paren">(</span><em>resource</em>, <em>cycle_timestamp</em>, <em>violations</em>, <em>global_configs</em>, <em>notifier_config</em>, <em>pipeline_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/base_email_notification_pipeline.html#BaseEmailNotificationPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline" title="google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline</span></code></a></p>
+<p>Base email pipeline.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.base_notification_pipeline">
+<span id="google-cloud-security-notifier-pipelines-base-notification-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.base_notification_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.base_notification_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Base pipeline to perform notifications</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.base_notification_pipeline.</code><code class="descname">BaseNotificationPipeline</code><span class="sig-paren">(</span><em>resource</em>, <em>cycle_timestamp</em>, <em>violations</em>, <em>global_configs</em>, <em>notifier_config</em>, <em>pipeline_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/base_notification_pipeline.html#BaseNotificationPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base pipeline to perform notifications</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/base_notification_pipeline.html#BaseNotificationPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the pipeline.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.cscc_pipeline">
+<span id="google-cloud-security-notifier-pipelines-cscc-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.cscc_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.cscc_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Upload violations to GCS bucket for CSCC integration.</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.cscc_pipeline.CsccPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.cscc_pipeline.</code><code class="descname">CsccPipeline</code><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/cscc_pipeline.html#CsccPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.cscc_pipeline.CsccPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Upload violations to GCS bucket as findings.</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.cscc_pipeline.CsccPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>violations</em>, <em>gcs_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/cscc_pipeline.html#CsccPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.cscc_pipeline.CsccPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the temporary json file and upload to GCS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>violations (dict): Violations to be uploaded as findings.
+gcs_path (str): The GCS bucket to upload the findings.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline">
+<span id="google-cloud-security-notifier-pipelines-email-inventory-snapshot-summary-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Email pipeline to notify that inventory snapshots have been completed.</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline.EmailInventorySnapshotSummaryPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline.</code><code class="descname">EmailInventorySnapshotSummaryPipeline</code><span class="sig-paren">(</span><em>sendgrid_key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/email_inventory_snapshot_summary_pipeline.html#EmailInventorySnapshotSummaryPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline.EmailInventorySnapshotSummaryPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline" title="google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline</span></code></a></p>
+<p>Email pipeline for inventory snapshot summary.</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline.EmailInventorySnapshotSummaryPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>snapshot_time</em>, <em>snapshot_timestamp</em>, <em>status</em>, <em>inventory_pipelines</em>, <em>email_sender</em>, <em>email_recipient</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/email_inventory_snapshot_summary_pipeline.html#EmailInventorySnapshotSummaryPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline.EmailInventorySnapshotSummaryPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the email pipeline</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">snapshot_time (datetime): Snapshot time, in UTC.
+snapshot_timestamp (str): Snapshot timestamp, formatted</p>
+<blockquote>
+<div>as YYYYMMDDTHHMMSSZ.</div></blockquote>
+<p class="last">status (str): Overall status of current snapshot cycle.
+inventory_pipelines (list): Inventory pipelines.
+email_sender (str): Sender of the email.
+email_recipient (str): Recipient of the email.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline">
+<span id="google-cloud-security-notifier-pipelines-email-scanner-summary-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Email pipeline for scanner summary.</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline.EmailScannerSummaryPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline.</code><code class="descname">EmailScannerSummaryPipeline</code><span class="sig-paren">(</span><em>sendgrid_key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/email_scanner_summary_pipeline.html#EmailScannerSummaryPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline.EmailScannerSummaryPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline" title="google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.notifier.pipelines.base_email_notification_pipeline.BaseEmailNotificationPipeline</span></code></a></p>
+<p>Email pipeline for scanner summary.</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline.EmailScannerSummaryPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>csv_name</em>, <em>output_filename</em>, <em>now_utc</em>, <em>all_violations</em>, <em>total_resources</em>, <em>violation_errors</em>, <em>email_sender</em>, <em>email_recipient</em>, <em>email_description</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/email_scanner_summary_pipeline.html#EmailScannerSummaryPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline.EmailScannerSummaryPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the email pipeline</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">csv_name (str): The full path of the local csv filename.
+output_filename (str): String of the output filename.
+now_utc (datetime): The UTC datetime right now.
+all_violations (list): The list of violations.
+total_resources (dict): A dict of the resources and their count.
+violation_errors (iterable): Iterable of violation errors.
+email_sender (str): The sender of the email.
+email_recipient (str): The recipient of the email.
+email_description (str): Brief scan description to include in the</p>
+<blockquote class="last">
+<div>subject of the email, e.g. &#8216;Policy Scan&#8217;.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.email_violations_pipeline">
+<span id="google-cloud-security-notifier-pipelines-email-violations-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.email_violations_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.email_violations_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Email pipeline to perform notifications</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.email_violations_pipeline.EmailViolationsPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.email_violations_pipeline.</code><code class="descname">EmailViolationsPipeline</code><span class="sig-paren">(</span><em>resource</em>, <em>cycle_timestamp</em>, <em>violations</em>, <em>global_configs</em>, <em>notifier_config</em>, <em>pipeline_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/email_violations_pipeline.html#EmailViolationsPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.email_violations_pipeline.EmailViolationsPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline" title="google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline</span></code></a></p>
+<p>Email pipeline to perform notifications</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.email_violations_pipeline.EmailViolationsPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/email_violations_pipeline.html#EmailViolationsPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.email_violations_pipeline.EmailViolationsPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the email pipeline</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.gcs_violations_pipeline">
+<span id="google-cloud-security-notifier-pipelines-gcs-violations-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.gcs_violations_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.gcs_violations_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Upload violations to GCS.</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.gcs_violations_pipeline.GcsViolationsPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.gcs_violations_pipeline.</code><code class="descname">GcsViolationsPipeline</code><span class="sig-paren">(</span><em>resource</em>, <em>cycle_timestamp</em>, <em>violations</em>, <em>global_configs</em>, <em>notifier_config</em>, <em>pipeline_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/gcs_violations_pipeline.html#GcsViolationsPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.gcs_violations_pipeline.GcsViolationsPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline" title="google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline</span></code></a></p>
+<p>Upload violations to GCS.</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.gcs_violations_pipeline.GcsViolationsPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/gcs_violations_pipeline.html#GcsViolationsPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.gcs_violations_pipeline.GcsViolationsPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the temporary json file and upload to GCS.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines.slack_webhook_pipeline">
+<span id="google-cloud-security-notifier-pipelines-slack-webhook-pipeline-module"></span><h2>google.cloud.security.notifier.pipelines.slack_webhook_pipeline module<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines.slack_webhook_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Slack webhook pipeline to perform notifications.</p>
+<dl class="class">
+<dt id="google.cloud.security.notifier.pipelines.slack_webhook_pipeline.SlackWebhookPipeline">
+<em class="property">class </em><code class="descclassname">google.cloud.security.notifier.pipelines.slack_webhook_pipeline.</code><code class="descname">SlackWebhookPipeline</code><span class="sig-paren">(</span><em>resource</em>, <em>cycle_timestamp</em>, <em>violations</em>, <em>global_configs</em>, <em>notifier_config</em>, <em>pipeline_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/slack_webhook_pipeline.html#SlackWebhookPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.slack_webhook_pipeline.SlackWebhookPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline" title="google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.notifier.pipelines.base_notification_pipeline.BaseNotificationPipeline</span></code></a></p>
+<p>Slack webhook pipeline to perform notifications</p>
+<dl class="method">
+<dt id="google.cloud.security.notifier.pipelines.slack_webhook_pipeline.SlackWebhookPipeline.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/pipelines/slack_webhook_pipeline.html#SlackWebhookPipeline.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.pipelines.slack_webhook_pipeline.SlackWebhookPipeline.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the slack webhook pipeline</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier.pipelines">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-google.cloud.security.notifier.pipelines" title="Permalink to this headline">¶</a></h2>
+<p>Forseti Security Notifier pipelines.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">google.cloud.security.notifier.pipelines package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.base_email_notification_pipeline">google.cloud.security.notifier.pipelines.base_email_notification_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.base_notification_pipeline">google.cloud.security.notifier.pipelines.base_notification_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.cscc_pipeline">google.cloud.security.notifier.pipelines.cscc_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline">google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline">google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.email_violations_pipeline">google.cloud.security.notifier.pipelines.email_violations_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.gcs_violations_pipeline">google.cloud.security.notifier.pipelines.gcs_violations_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines.slack_webhook_pipeline">google.cloud.security.notifier.pipelines.slack_webhook_pipeline module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.pipelines">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/google.cloud.security.notifier.pipelines.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/source/google.cloud.security.notifier.pipelines.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

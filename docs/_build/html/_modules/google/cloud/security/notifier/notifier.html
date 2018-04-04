@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.notifier.notifier &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.notifier.notifier</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;Notifier.</span>
+
+<span class="sd">Usage:</span>
+
+<span class="sd">  $ forseti_notifier --db_host &lt;Cloud SQL database hostname/IP&gt; \\</span>
+<span class="sd">      --db_user &lt;Cloud SQL database user&gt; \\</span>
+<span class="sd">      --db_name &lt;Cloud SQL database name (required)&gt; \\</span>
+<span class="sd">      --config &lt;Notification configuration&gt; \\</span>
+<span class="sd">      --timestamp &lt;Snapshot timestamp to search for violations&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">gflags</span> <span class="kn">as</span> <span class="nn">flags</span>
+
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="kn">from</span> <span class="nn">google.apputils</span> <span class="kn">import</span> <span class="n">app</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">db_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">violation_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">file_loader</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.notifier.pipelines.base_notification_pipeline</span> <span class="kn">import</span> <span class="n">BaseNotificationPipeline</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.notifier.pipelines.cscc_pipeline</span> <span class="kn">import</span> <span class="n">CsccPipeline</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.notifier.pipelines</span> <span class="kn">import</span> <span class="n">email_inventory_snapshot_summary_pipeline</span> <span class="k">as</span> <span class="n">inv_summary</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.notifier.pipelines</span> <span class="kn">import</span> <span class="n">email_scanner_summary_pipeline</span> <span class="k">as</span> <span class="n">scanner_summary</span>
+<span class="c1"># pylint: enable=line-too-long</span>
+
+
+<span class="c1"># Setup flags</span>
+<span class="n">FLAGS</span> <span class="o">=</span> <span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
+
+<span class="c1"># Format: flags.DEFINE_&lt;type&gt;(flag_name, default_value, help_text)</span>
+<span class="c1"># Example:</span>
+<span class="c1"># https://github.com/google/python-gflags/blob/master/examples/validator.py</span>
+<span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;Snapshot timestamp&#39;</span><span class="p">)</span>
+<span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;Config file to use&#39;</span><span class="p">,</span> <span class="n">short_name</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+
+<span class="c1"># Hack to make the test pass due to duplicate flag error here</span>
+<span class="c1"># and inventory_loader.</span>
+<span class="c1"># TODO: Find a way to remove this try/except, possibly dividing the tests</span>
+<span class="c1"># into different test suites.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span>
+        <span class="s1">&#39;forseti_config&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/home/ubuntu/forseti-security/configs/forseti_conf.yaml&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Fully qualified path and filename of the Forseti config file.&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">flags</span><span class="o">.</span><span class="n">DuplicateFlagError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">OUTPUT_TIMESTAMP_FMT</span> <span class="o">=</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H%M%SZ&#39;</span>
+
+<div class="viewcode-block" id="find_pipelines"><a class="viewcode-back" href="../../../../../source/google.cloud.security.notifier.html#google.cloud.security.notifier.notifier.find_pipelines">[docs]</a><span class="k">def</span> <span class="nf">find_pipelines</span><span class="p">(</span><span class="n">pipeline_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the first class in the given sub module</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pipeline_name (str): Name of the pipeline.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        class: The class in the sub module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span>
+            <span class="s1">&#39;google.cloud.security.notifier.pipelines.{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">pipeline_name</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> \
+               <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">BaseNotificationPipeline</span><span class="p">)</span> \
+               <span class="ow">and</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">BaseNotificationPipeline</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">obj</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Can</span><span class="se">\&#39;</span><span class="s1">t import pipeline </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pipeline_name</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="bp">None</span></div>
+
+<span class="k">def</span> <span class="nf">_get_timestamp</span><span class="p">(</span><span class="n">global_configs</span><span class="p">,</span> <span class="n">statuses</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;SUCCESS&#39;</span><span class="p">,</span> <span class="s1">&#39;PARTIAL_SUCCESS&#39;</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;Get latest snapshot timestamp.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        global_configs (dict): Global configurations.</span>
+<span class="sd">        statuses (tuple): Snapshot statues.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        string: The latest snapshot timestamp.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">latest_timestamp</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">current_dao</span> <span class="o">=</span> <span class="n">dao</span><span class="o">.</span><span class="n">Dao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">)</span>
+        <span class="n">latest_timestamp</span> <span class="o">=</span> <span class="n">current_dao</span><span class="o">.</span><span class="n">get_latest_snapshot_timestamp</span><span class="p">(</span><span class="n">statuses</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">db_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error getting latest snapshot timestamp: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">latest_timestamp</span>
+
+<div class="viewcode-block" id="process"><a class="viewcode-back" href="../../../../../source/google.cloud.security.notifier.html#google.cloud.security.notifier.notifier.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process messages about what notifications to send.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (dict): Message with payload in dict.</span>
+<span class="sd">            The payload will be different depending on the sender</span>
+<span class="sd">            of the message.</span>
+
+<span class="sd">            Example:</span>
+<span class="sd">                {&#39;status&#39;: &#39;foobar_done&#39;,</span>
+<span class="sd">                 &#39;payload&#39;: {}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;payload&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;inventory_done&#39;</span><span class="p">:</span>
+        <span class="n">inv_email_pipeline</span> <span class="o">=</span> <span class="n">inv_summary</span><span class="o">.</span><span class="n">EmailInventorySnapshotSummaryPipeline</span><span class="p">(</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sendgrid_api_key&#39;</span><span class="p">))</span>
+        <span class="n">inv_email_pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cycle_time&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cycle_timestamp&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;snapshot_cycle_status&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pipelines&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_sender&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_recipient&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;scanner_done&#39;</span><span class="p">:</span>
+        <span class="n">scanner_email_pipeline</span> <span class="o">=</span> <span class="n">scanner_summary</span><span class="o">.</span><span class="n">EmailScannerSummaryPipeline</span><span class="p">(</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sendgrid_api_key&#39;</span><span class="p">))</span>
+        <span class="n">scanner_email_pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_csv_name&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_filename&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;now_utc&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;all_violations&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource_counts&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;violation_errors&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_sender&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_recipient&#39;</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_description&#39;</span><span class="p">))</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="run_cscc_notification"><a class="viewcode-back" href="../../../../../source/google.cloud.security.notifier.html#google.cloud.security.notifier.notifier.run_cscc_notification">[docs]</a><span class="k">def</span> <span class="nf">run_cscc_notification</span><span class="p">(</span><span class="n">notifier_configs</span><span class="p">,</span> <span class="n">violations_as_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the first class in the given sub module</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        notifier_configs (dict): Notification configuration.</span>
+<span class="sd">        violations_as_dict (tuple): Tuple of violations in dict format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">notifier_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;violation&#39;</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Violation section is not found in forseti config file.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">notifier_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;violation&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cscc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;CSCC notification is not enabled.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="s1">&#39;{CSCC_BUCKET}&#39;</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">notifier_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;violation&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cscc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;gcs_path&#39;</span><span class="p">)):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;CSCC bucket is not configured.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">CsccPipeline</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="n">violations_as_dict</span><span class="p">,</span>
+        <span class="n">notifier_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;violation&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cscc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;gcs_path&#39;</span><span class="p">))</span></div>
+
+<span class="c1"># pylint: disable=too-many-locals</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../../source/google.cloud.security.notifier.html#google.cloud.security.notifier.notifier.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Main function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _ (obj): Result of the last expression evaluated in the interpreter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">notifier_flags</span> <span class="o">=</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">FlagValuesDict</span><span class="p">()</span>
+
+    <span class="n">forseti_config</span> <span class="o">=</span> <span class="n">notifier_flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;forseti_config&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">forseti_config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Path to Forseti Security config needs to be specified.&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">file_loader</span><span class="o">.</span><span class="n">read_and_parse_file</span><span class="p">(</span><span class="n">forseti_config</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to open Forseti Security config file. &#39;</span>
+                     <span class="s1">&#39;Please check your path and filename and try again.&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+    <span class="n">global_configs</span> <span class="o">=</span> <span class="n">configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;global&#39;</span><span class="p">)</span>
+    <span class="n">notifier_configs</span> <span class="o">=</span> <span class="n">configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;notifier&#39;</span><span class="p">)</span>
+
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">notifier_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">_get_timestamp</span><span class="p">(</span><span class="n">global_configs</span><span class="p">)</span>
+
+    <span class="c1"># get violations</span>
+    <span class="n">v_dao</span> <span class="o">=</span> <span class="n">violation_dao</span><span class="o">.</span><span class="n">ViolationDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">)</span>
+    <span class="n">violations_as_dict</span> <span class="o">=</span> <span class="n">v_dao</span><span class="o">.</span><span class="n">get_all_violations</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">violations_as_dict</span><span class="p">:</span>
+        <span class="n">i</span><span class="p">[</span><span class="s1">&#39;created_at_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">i</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created_at_datetime&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">))</span>
+
+    <span class="n">violations</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">violations</span> <span class="o">=</span> <span class="n">violation_dao</span><span class="o">.</span><span class="n">map_by_resource</span><span class="p">(</span><span class="n">violations_as_dict</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">db_errors</span><span class="o">.</span><span class="n">MySQLError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># even if an error is raised we still want to continue execution</span>
+        <span class="c1"># this is because if we don&#39;t have violations the Mysql table</span>
+        <span class="c1"># is not present and an error is thrown</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;get_all_violations error: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">retrieved_v</span> <span class="ow">in</span> <span class="n">violations</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved </span><span class="si">%d</span><span class="s1"> violations for resource </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">violations</span><span class="p">[</span><span class="n">retrieved_v</span><span class="p">]),</span> <span class="n">retrieved_v</span><span class="p">)</span>
+
+    <span class="c1"># build notification pipelines</span>
+    <span class="n">pipelines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">notifier_configs</span><span class="p">[</span><span class="s1">&#39;resources&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">violations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;The resource name </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1"> has no violations, &#39;</span>
+                        <span class="s1">&#39;skipping&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">])</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">violations</span><span class="p">[</span><span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">]]:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No violations for: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">])</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;should_notify&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">pipeline</span> <span class="ow">in</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;pipelines&#39;</span><span class="p">]:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Running </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1"> pipeline for resource </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="n">pipeline</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">])</span>
+            <span class="n">chosen_pipeline</span> <span class="o">=</span> <span class="n">find_pipelines</span><span class="p">(</span><span class="n">pipeline</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">pipelines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chosen_pipeline</span><span class="p">(</span><span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">],</span>
+                                             <span class="n">timestamp</span><span class="p">,</span>
+                                             <span class="n">violations</span><span class="p">[</span><span class="n">resource</span><span class="p">[</span><span class="s1">&#39;resource&#39;</span><span class="p">]],</span>
+                                             <span class="n">global_configs</span><span class="p">,</span>
+                                             <span class="n">notifier_configs</span><span class="p">,</span>
+                                             <span class="n">pipeline</span><span class="p">[</span><span class="s1">&#39;configuration&#39;</span><span class="p">]))</span>
+
+    <span class="c1"># run the pipelines</span>
+    <span class="k">for</span> <span class="n">pipeline</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">:</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="n">run_cscc_notification</span><span class="p">(</span><span class="n">notifier_configs</span><span class="p">,</span> <span class="n">violations_as_dict</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

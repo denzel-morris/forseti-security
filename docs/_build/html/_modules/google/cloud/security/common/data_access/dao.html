@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.data_access.dao &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.common.data_access.dao</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Provides the data access object (DAO).&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">DataError</span>
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">IntegrityError</span>
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">InternalError</span>
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">NotSupportedError</span>
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">OperationalError</span>
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">ProgrammingError</span>
+<span class="kn">from</span> <span class="nn">MySQLdb</span> <span class="kn">import</span> <span class="n">cursors</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">_db_connector</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">csv_writer</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">load_data_sql_provider</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.errors</span> <span class="kn">import</span> <span class="n">MySQLError</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.errors</span> <span class="kn">import</span> <span class="n">NoResultsError</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.sql_queries</span> <span class="kn">import</span> <span class="n">create_tables</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.sql_queries</span> <span class="kn">import</span> <span class="n">select_data</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="n">CREATE_TABLE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># appengine</span>
+    <span class="s1">&#39;appengine&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_APPENGINE_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># appengine services</span>
+    <span class="s1">&#39;appengine_services&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_APPENGINE_SERVICES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># appengine versions</span>
+    <span class="s1">&#39;appengine_versions&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_APPENGINE_VERSIONS_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># appengine instances</span>
+    <span class="s1">&#39;appengine_instances&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_APPENGINE_INSTANCES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># backend services</span>
+    <span class="s1">&#39;backend_services&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_BACKEND_SERVICES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># bigquery</span>
+    <span class="s1">&#39;bigquery_datasets&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_BIGQUERY_DATASETS_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># buckets</span>
+    <span class="s1">&#39;buckets&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_BUCKETS_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;raw_buckets&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_RAW_BUCKETS_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;buckets_acl&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_BUCKETS_ACL_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># cloudsql</span>
+    <span class="s1">&#39;cloudsql_instances&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_CLOUDSQL_INSTANCES_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;cloudsql_ipaddresses&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_CLOUDSQL_IPADDRESSES_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;cloudsql_ipconfiguration_authorizednetworks&#39;</span><span class="p">:</span>\
+        <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_CLOUDSQL_IPCONFIGURATION_AUTHORIZEDNETWORKS</span><span class="p">,</span>
+
+    <span class="c1"># folders</span>
+    <span class="s1">&#39;folders&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_FOLDERS_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;folder_iam_policies&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_FOLDER_IAM_POLICIES_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;raw_folder_iam_policies&#39;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_RAW_FOLDER_IAM_POLICIES_TABLE</span><span class="p">),</span>
+
+    <span class="c1"># load balancer</span>
+    <span class="s1">&#39;forwarding_rules&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_FORWARDING_RULES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># firewall_rules</span>
+    <span class="s1">&#39;firewall_rules&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_FIREWALL_RULES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># ke</span>
+    <span class="s1">&#39;ke&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_KE_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># groups</span>
+    <span class="s1">&#39;groups&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_GROUPS_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;group_members&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_GROUP_MEMBERS_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># instances</span>
+    <span class="s1">&#39;instances&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_INSTANCES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># instance groups</span>
+    <span class="s1">&#39;instance_groups&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_INSTANCE_GROUPS_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># instance templates</span>
+    <span class="s1">&#39;instance_templates&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_INSTANCE_TEMPLATES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># instance group managers</span>
+    <span class="s1">&#39;instance_group_managers&#39;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_INSTANCE_GROUP_MANAGERS_TABLE</span><span class="p">),</span>
+
+    <span class="c1"># organizations</span>
+    <span class="s1">&#39;organizations&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_ORGANIZATIONS_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;org_iam_policies&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_ORG_IAM_POLICIES_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;raw_org_iam_policies&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_RAW_ORG_IAM_POLICIES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># projects</span>
+    <span class="s1">&#39;projects&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_PROJECT_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;project_iam_policies&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_PROJECT_IAM_POLICIES_TABLE</span><span class="p">,</span>
+    <span class="s1">&#39;raw_project_iam_policies&#39;</span><span class="p">:</span>
+        <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_RAW_PROJECT_IAM_POLICIES_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># IAM</span>
+    <span class="s1">&#39;service_accounts&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_SERVICE_ACCOUNTS_TABLE</span><span class="p">,</span>
+
+    <span class="c1"># rule violations</span>
+    <span class="s1">&#39;violations&#39;</span><span class="p">:</span> <span class="n">create_tables</span><span class="o">.</span><span class="n">CREATE_VIOLATIONS_TABLE</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">SNAPSHOT_STATUS_FILTER_CLAUSE</span> <span class="o">=</span> <span class="s1">&#39; where status in ({})&#39;</span>
+
+
+<div class="viewcode-block" id="Dao"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao">[docs]</a><span class="k">class</span> <span class="nc">Dao</span><span class="p">(</span><span class="n">_db_connector</span><span class="o">.</span><span class="n">DbConnector</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data access object (DAO).&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Dao.map_row_to_object"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.map_row_to_object">[docs]</a>    <span class="k">def</span> <span class="nf">map_row_to_object</span><span class="p">(</span><span class="n">object_class</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiate an object from database row.</span>
+
+<span class="sd">        TODO: Make this go away when we start using an ORM.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            object_class (object): The object class to create.</span>
+<span class="sd">            row (row): The database row to map.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            obj_class: A new &quot;obj_class&quot;, created from the row.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">object_class</span><span class="p">(</span><span class="o">**</span><span class="n">row</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dao.create_snapshot_table"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.create_snapshot_table">[docs]</a>    <span class="k">def</span> <span class="nf">create_snapshot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a snapshot table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            timestamp (str): String of timestamp, formatted as</span>
+<span class="sd">                YYYYMMDDTHHMMSSZ.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: String of the created snapshot table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">snapshot_table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_snapshot_table_name</span><span class="p">(</span>
+            <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">create_table_sql</span> <span class="o">=</span> <span class="n">CREATE_TABLE_MAP</span><span class="p">[</span><span class="n">resource_name</span><span class="p">]</span>
+        <span class="n">create_snapshot_sql</span> <span class="o">=</span> <span class="n">create_table_sql</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">snapshot_table_name</span><span class="p">)</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">create_snapshot_sql</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">snapshot_table_name</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_snapshot_table_name</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the snapshot table if it doesn&#39;t exist.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            timestamp (str): String of timestamp, formatted as</span>
+<span class="sd">                YYYYMMDDTHHMMSSZ.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: String of the created snapshot table name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">resource_name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">timestamp</span>
+
+    <span class="k">def</span> <span class="nf">_get_snapshot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a snapshot table name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            timestamp (str): String of timestamp, formatted as YYYYMMDDTHHMMSSZ.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: String of the created snapshot table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">snapshot_table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_snapshot_table</span><span class="p">(</span>
+                <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">OperationalError</span><span class="p">:</span>
+            <span class="c1"># TODO: find a better way to handle this. I want this method</span>
+            <span class="c1"># to be resilient when the table has already been created</span>
+            <span class="c1"># so that it can support inserting new data. This will catch</span>
+            <span class="c1"># a sql &#39;table already exist&#39; error and alter the flow.</span>
+            <span class="n">snapshot_table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_snapshot_table_name</span><span class="p">(</span>
+                <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">snapshot_table_name</span>
+
+<div class="viewcode-block" id="Dao.load_data"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load data into a snapshot table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            timestamp (str): String of timestamp, formatted as</span>
+<span class="sd">                YYYYMMDDTHHMMSSZ.</span>
+<span class="sd">            data (iterable): An iterable or a list of data to be uploaded.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            MySQLError: When an error has occured while executing the query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">csv_writer</span><span class="o">.</span><span class="n">write_csv</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_file</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">snapshot_table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_snapshot_table_name</span><span class="p">(</span>
+                    <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+                <span class="n">load_data_sql</span> <span class="o">=</span> <span class="n">load_data_sql_provider</span><span class="o">.</span><span class="n">provide_load_data_sql</span><span class="p">(</span>
+                    <span class="n">resource_name</span><span class="p">,</span> <span class="n">csv_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">snapshot_table_name</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;SQL: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">load_data_sql</span><span class="p">)</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">load_data_sql</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="c1"># TODO: Return the snapshot table name so that it can be tracked</span>
+                <span class="c1"># in the main snapshot table.</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">DataError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">InternalError</span><span class="p">,</span>
+                    <span class="n">NotSupportedError</span><span class="p">,</span> <span class="n">OperationalError</span><span class="p">,</span>
+                    <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dao.select_record_count"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.select_record_count">[docs]</a>    <span class="k">def</span> <span class="nf">select_record_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Select the record count from a snapshot table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name, which is</span>
+<span class="sd">                embedded in the table name.</span>
+<span class="sd">            timestamp (str): String of timestamp, formatted as</span>
+<span class="sd">                YYYYMMDDTHHMMSSZ.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Integer of the record count in a snapshot table.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            MySQLError: When an error has occured while executing the query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">record_count_sql</span> <span class="o">=</span> <span class="n">select_data</span><span class="o">.</span><span class="n">RECORD_COUNT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">record_count_sql</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DataError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">InternalError</span><span class="p">,</span> <span class="n">NotSupportedError</span><span class="p">,</span>
+                <span class="n">OperationalError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dao.select_group_ids"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.select_group_ids">[docs]</a>    <span class="k">def</span> <span class="nf">select_group_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Select the group ids from a snapshot table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            timestamp (str): String of timestamp, formatted as</span>
+<span class="sd">                YYYYMMDDTHHMMSSZ.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of group ids.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            MySQLError: When an error has occured while executing the query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">group_ids_sql</span> <span class="o">=</span> <span class="n">select_data</span><span class="o">.</span><span class="n">GROUP_IDS</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">(</span><span class="n">cursorclass</span><span class="o">=</span><span class="n">cursors</span><span class="o">.</span><span class="n">DictCursor</span><span class="p">)</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">group_ids_sql</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;group_id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DataError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">InternalError</span><span class="p">,</span> <span class="n">NotSupportedError</span><span class="p">,</span>
+                <span class="n">OperationalError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dao.execute_sql_with_fetch"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.execute_sql_with_fetch">[docs]</a>    <span class="k">def</span> <span class="nf">execute_sql_with_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Executes a provided sql statement with fetch.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            sql (str): String of the sql statement.</span>
+<span class="sd">            values (tuple): Tuple of string for sql placeholder values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of dict representing rows of sql query result.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            MySQLError: When an error has occured while executing the query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">(</span><span class="n">cursorclass</span><span class="o">=</span><span class="n">cursors</span><span class="o">.</span><span class="n">DictCursor</span><span class="p">)</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DataError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">InternalError</span><span class="p">,</span> <span class="n">NotSupportedError</span><span class="p">,</span>
+                <span class="n">OperationalError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dao.execute_sql_with_commit"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.execute_sql_with_commit">[docs]</a>    <span class="k">def</span> <span class="nf">execute_sql_with_commit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Executes a provided sql statement with commit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): String of the resource name.</span>
+<span class="sd">            sql (str): String of the sql statement.</span>
+<span class="sd">            values (tuple): Tuple of string for sql placeholder values.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            MySQLError: When an error has occured while executing the query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DataError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">InternalError</span><span class="p">,</span> <span class="n">NotSupportedError</span><span class="p">,</span>
+                <span class="n">OperationalError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MySQLError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dao.get_latest_snapshot_timestamp"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.data_access.html#google.cloud.security.common.data_access.dao.Dao.get_latest_snapshot_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">get_latest_snapshot_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statuses</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Select the latest timestamp of the completed snapshot.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            statuses (tuple): The tuple of snapshot statuses to filter on.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The string timestamp of the latest complete snapshot.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            MySQLError: When no rows are found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Build a dynamic parameterized query string for filtering the</span>
+        <span class="c1"># snapshot statuses</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statuses</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">statuses</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SUCCESS&#39;</span><span class="p">,)</span>
+
+        <span class="n">status_params</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">statuses</span><span class="p">))</span>
+        <span class="n">filter_clause</span> <span class="o">=</span> <span class="n">SNAPSHOT_STATUS_FILTER_CLAUSE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">status_params</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">select_data</span><span class="o">.</span><span class="n">LATEST_SNAPSHOT_TIMESTAMP</span> <span class="o">+</span> <span class="n">filter_clause</span><span class="p">,</span> <span class="n">statuses</span><span class="p">)</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="n">NoResultsError</span><span class="p">(</span><span class="s1">&#39;No snapshot cycle found.&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DataError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">InternalError</span><span class="p">,</span> <span class="n">NotSupportedError</span><span class="p">,</span>
+                <span class="n">OperationalError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">,</span> <span class="n">NoResultsError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MySQLError</span><span class="p">(</span><span class="s1">&#39;snapshot_cycles&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

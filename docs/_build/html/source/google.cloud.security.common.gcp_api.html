@@ -1,0 +1,1804 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.gcp_api package &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="google-cloud-security-common-gcp-api-package">
+<h1>google.cloud.security.common.gcp_api package<a class="headerlink" href="#google-cloud-security-common-gcp-api-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.admin_directory">
+<span id="google-cloud-security-common-gcp-api-admin-directory-module"></span><h2>google.cloud.security.common.gcp_api.admin_directory module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.admin_directory" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for Admin Directory  API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.admin_directory.</code><code class="descname">AdminDirectoryClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/admin_directory.html#AdminDirectoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>GSuite Admin Directory API Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 100.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient.get_group_members">
+<code class="descname">get_group_members</code><span class="sig-paren">(</span><em>group_key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/admin_directory.html#AdminDirectoryClient.get_group_members"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient.get_group_members" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the members for specified groups.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>group_key (str): The group&#8217;s unique id assigned by the Admin API.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of member objects from the API.</dd>
+<dt>Raises:</dt>
+<dd>api_errors.ApiExecutionError: If group member retrieval fails.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient.get_groups">
+<code class="descname">get_groups</code><span class="sig-paren">(</span><em>customer_id='my_customer'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/admin_directory.html#AdminDirectoryClient.get_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryClient.get_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the groups for a given customer_id.</p>
+<p>A note on customer_id=&#8217;my_customer&#8217;. This is a magic string instead
+of using the real customer id. See:</p>
+<p><a class="reference external" href="https://developers.google.com/admin-sdk/directory/v1/guides/manage-groups#get_all_domain_groups">https://developers.google.com/admin-sdk/directory/v1/guides/manage-groups#get_all_domain_groups</a></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>customer_id (str): The customer id to scope the request to.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of group objects returned from the API.</dd>
+<dt>Raises:</dt>
+<dd>api_errors.ApiExecutionError: If groups retrieval fails.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.admin_directory.</code><code class="descname">AdminDirectoryRepositoryClient</code><span class="sig-paren">(</span><em>credentials</em>, <em>quota_max_calls=None</em>, <em>quota_period=1.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/admin_directory.html#AdminDirectoryRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Admin Directory API Respository Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryRepositoryClient.groups">
+<code class="descname">groups</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryRepositoryClient.groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an _AdminDirectoryGroupsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryRepositoryClient.members">
+<code class="descname">members</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.admin_directory.AdminDirectoryRepositoryClient.members" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an _AdminDirectoryMembersRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.api_helpers">
+<span id="google-cloud-security-common-gcp-api-api-helpers-module"></span><h2>google.cloud.security.common.gcp_api.api_helpers module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.api_helpers" title="Permalink to this headline">¶</a></h2>
+<p>Helper functions for API clients.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.gcp_api.api_helpers.credential_from_keyfile">
+<code class="descclassname">google.cloud.security.common.gcp_api.api_helpers.</code><code class="descname">credential_from_keyfile</code><span class="sig-paren">(</span><em>keyfile_name</em>, <em>scopes</em>, <em>delegated_account</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/api_helpers.html#credential_from_keyfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.api_helpers.credential_from_keyfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build delegated credentials required for accessing the gsuite APIs.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>keyfile_name (str): The filename to load the json service account key</dt>
+<dd>from.</dd>
+</dl>
+<p>scopes (list): The list of required scopes for the service account.
+delegated_account (str): The account to delegate the service account to</p>
+<blockquote class="last">
+<div>use.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>OAuth2Credentials: Credentials as built by oauth2client.</dd>
+<dt>Raises:</dt>
+<dd>api_errors.ApiExecutionError: If fails to build credentials.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.gcp_api.api_helpers.flatten_aggregated_list_results">
+<code class="descclassname">google.cloud.security.common.gcp_api.api_helpers.</code><code class="descname">flatten_aggregated_list_results</code><span class="sig-paren">(</span><em>paged_results</em>, <em>item_key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/api_helpers.html#flatten_aggregated_list_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.api_helpers.flatten_aggregated_list_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flatten a split-up list as returned by GCE &#8220;aggregatedList&#8221; API.</p>
+<p>The compute API&#8217;s aggregatedList methods return a structure in
+the form:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{</dt>
+<dd><dl class="first docutils">
+<dt>items: {</dt>
+<dd><dl class="first docutils">
+<dt>$group_value_1: {</dt>
+<dd>$item_key: [$items]</dd>
+</dl>
+<p>},
+$group_value_2: {</p>
+<blockquote>
+<div>$item_key: [$items]</div></blockquote>
+<p>},
+$group_value_3: {</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>&#8220;warning&#8221;: {</dt>
+<dd>message: &#8220;There are no results for ...&#8221;</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>},
+...,
+$group_value_n, {</p>
+<blockquote>
+<div>$item_key: [$items]</div></blockquote>
+<p class="last">},</p>
+</dd>
+</dl>
+<p class="last">}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>where each &#8220;$group_value_n&#8221; is a particular element in the
+aggregation, e.g. a particular zone or group or whatever, and
+&#8220;$item_key&#8221; is some type-specific resource name, e.g.
+&#8220;backendServices&#8221; for an aggregated list of backend services.</p>
+<p>This method takes such a structure and yields a simple list of
+all $items across all of the groups.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>paged_results (list): A list of paged API response objects.</dt>
+<dd>[{page 1 results}, {page 2 results}, {page 3 results}, ...]</dd>
+<dt>item_key (str): The name of the key within the inner &#8220;items&#8221; lists</dt>
+<dd>containing the objects of interest.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>list: A list of items.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.gcp_api.api_helpers.flatten_list_results">
+<code class="descclassname">google.cloud.security.common.gcp_api.api_helpers.</code><code class="descname">flatten_list_results</code><span class="sig-paren">(</span><em>paged_results</em>, <em>item_key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/api_helpers.html#flatten_list_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.api_helpers.flatten_list_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flatten a split-up list as returned by list_next() API.</p>
+<dl class="docutils">
+<dt>GCE &#8216;list&#8217; APIs return results in the form:</dt>
+<dd>{item_key: [...]}</dd>
+</dl>
+<p>with one dictionary for each &#8220;page&#8221; of results. This method flattens
+that to a simple list of items.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>paged_results (list): A list of paged API response objects.</dt>
+<dd>[{page 1 results}, {page 2 results}, {page 3 results}, ...]</dd>
+<dt>item_key (str): The name of the key within the inner &#8220;items&#8221; lists</dt>
+<dd>containing the objects of interest.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>list: A list of items.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.appengine">
+<span id="google-cloud-security-common-gcp-api-appengine-module"></span><h2>google.cloud.security.common.gcp_api.appengine module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.appengine" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for AppEngine API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.appengine.</code><code class="descname">AppEngineClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>AppEngine Client.</p>
+<p><a class="reference external" href="https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps">https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps</a></p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 1.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_app">
+<code class="descname">get_app</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.get_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets information about an application.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.</dd>
+<dt>Returns:</dt>
+<dd>dict: The response of retrieving the AppEngine app.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_instance">
+<code class="descname">get_instance</code><span class="sig-paren">(</span><em>project_id</em>, <em>service_id</em>, <em>version_id</em>, <em>instances_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.get_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets information about a specific instance of a service.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.
+service_id (str): The id of the service to query.
+version_id (str): The id of the version to query.
+instances_id (str): The id of the instance to query.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: An Instance resource dict for a given project_id,</dt>
+<dd>service_id and version_id.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_service">
+<code class="descname">get_service</code><span class="sig-paren">(</span><em>project_id</em>, <em>service_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.get_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets information about a specific service.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.
+service_id (str): The id of the service to query.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: A Service resource dict for a given project_id and</dt>
+<dd>service_id.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_version">
+<code class="descname">get_version</code><span class="sig-paren">(</span><em>project_id</em>, <em>service_id</em>, <em>version_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.get_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.get_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets information about a specific version of a service.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.
+service_id (str): The id of the service to query.
+version_id (str): The id of the version to query.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: A Version resource dict for a given project_id and</dt>
+<dd>service_id.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.list_instances">
+<code class="descname">list_instances</code><span class="sig-paren">(</span><em>project_id</em>, <em>service_id</em>, <em>version_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.list_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.list_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists instances of a given service and version.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.
+service_id (str): The id of the service to query.
+version_id (str): The id of the version to query.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Instance resource dicts for a given Version.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.list_services">
+<code class="descname">list_services</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.list_services"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.list_services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists services of a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Service resource dicts for a project_id.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineClient.list_versions">
+<code class="descname">list_versions</code><span class="sig-paren">(</span><em>project_id</em>, <em>service_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineClient.list_versions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineClient.list_versions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists versions of a given service.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.
+service_id (str): The id of the service to query.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Version resource dicts for a given Service.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.appengine.</code><code class="descname">AppEngineRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=1.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/appengine.html#AppEngineRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>AppEngine API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.app_services">
+<code class="descname">app_services</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.app_services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an _AppEngineAppsServicesRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.apps">
+<code class="descname">apps</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.apps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an _AppEngineAppsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.service_versions">
+<code class="descname">service_versions</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.service_versions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an _AppEngineAppsServicesVersionsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.version_instances">
+<code class="descname">version_instances</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.appengine.AppEngineRepositoryClient.version_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an _AppEngineAppsServicesVersionsInstancesRepository.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.bigquery">
+<span id="google-cloud-security-common-gcp-api-bigquery-module"></span><h2>google.cloud.security.common.gcp_api.bigquery module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.bigquery" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for the BigQuery API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.bigquery.</code><code class="descname">BigQueryClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/bigquery.html#BigQueryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>BigQuery Client manager.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 100.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryClient.get_bigquery_projectids">
+<code class="descname">get_bigquery_projectids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/bigquery.html#BigQueryClient.get_bigquery_projectids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryClient.get_bigquery_projectids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request and page through bigquery projectids.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><p class="first">list: A list of project_ids enabled for bigquery.</p>
+<dl class="docutils">
+<dt>[&#8216;project-id&#8217;,</dt>
+<dd>&#8216;project-id&#8217;,
+&#8216;...&#8217;]</dd>
+</dl>
+<p class="last">If there are no project_ids enabled for bigquery an empty list will
+be returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryClient.get_dataset_access">
+<code class="descname">get_dataset_access</code><span class="sig-paren">(</span><em>project_id</em>, <em>dataset_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/bigquery.html#BigQueryClient.get_dataset_access"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryClient.get_dataset_access" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the access portion of the dataset resource object.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): String representing the project id.
+dataset_id (str): String representing the dataset id.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">list: A list of access lists for a given project_id and dataset_id.
+[{&#8216;role&#8217;: &#8216;WRITER&#8217;, &#8216;specialGroup&#8217;: &#8216;projectWriters&#8217;},</p>
+<blockquote class="last">
+<div>{&#8216;role&#8217;: &#8216;OWNER&#8217;, &#8216;specialGroup&#8217;: &#8216;projectOwners&#8217;},
+{&#8216;role&#8217;: &#8216;OWNER&#8217;, &#8216;userByEmail&#8217;: <a class="reference external" href="mailto:'user&#37;&#52;&#48;domain&#46;com">'user<span>&#64;</span>domain<span>&#46;</span>com</a>&#8216;},
+{&#8216;role&#8217;: &#8216;READER&#8217;, &#8216;specialGroup&#8217;: &#8216;projectReaders&#8217;}]</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryClient.get_datasets_for_projectid">
+<code class="descname">get_datasets_for_projectid</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/bigquery.html#BigQueryClient.get_datasets_for_projectid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryClient.get_datasets_for_projectid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return BigQuery datasets stored in the requested project_id.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): String representing the project id.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">list: A list of datasetReference objects for a given project_id.</p>
+<dl class="last docutils">
+<dt>[{&#8216;datasetId&#8217;: &#8216;dataset-id&#8217;,</dt>
+<dd><blockquote class="first">
+<div>&#8216;projectId&#8217;: &#8216;project-id&#8217;},</div></blockquote>
+<p class="last">{...}]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.bigquery.</code><code class="descname">BigQueryRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=100.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/bigquery.html#BigQueryRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Big Query API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryRepositoryClient.datasets">
+<code class="descname">datasets</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryRepositoryClient.datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _BigQueryDatasetsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.bigquery.BigQueryRepositoryClient.projects">
+<code class="descname">projects</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.bigquery.BigQueryRepositoryClient.projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _BigQueryProjectsRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.cloud_resource_manager">
+<span id="google-cloud-security-common-gcp-api-cloud-resource-manager-module"></span><h2>google.cloud.security.common.gcp_api.cloud_resource_manager module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.cloud_resource_manager" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for Resource Manager API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.cloud_resource_manager.</code><code class="descname">CloudResourceManagerClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Resource Manager Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 100.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_folder">
+<code class="descname">get_folder</code><span class="sig-paren">(</span><em>folder_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a folder.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>folder_name (str): The unique folder name, with the format</dt>
+<dd>&#8220;folders/{folderId}&#8221;.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>dict: The folder API response.</dd>
+<dt>Raises:</dt>
+<dd>ApiExecutionError: An error has occurred when executing the API.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_folder_iam_policies">
+<code class="descname">get_folder_iam_policies</code><span class="sig-paren">(</span><em>resource_name</em>, <em>folder_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_folder_iam_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_folder_iam_policies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the iam policies of an folder.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name (type).
+folder_id (int): The folder id.</dd>
+<dt>Returns:</dt>
+<dd>dict: Folder IAM policy for given folder_id.</dd>
+<dt>Raises:</dt>
+<dd>ApiExecutionError: An error has occurred when executing the API.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_folders">
+<code class="descname">get_folders</code><span class="sig-paren">(</span><em>resource_name</em>, <em>parent=None</em>, <em>show_deleted=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_folders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all folders that the authenticated account has access to.</p>
+<p>If no parent is passed in, then all folders the caller has visibility
+to are returned. This is significantly less efficient then listing by
+parent.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): The resource type.
+parent (str): Optional parent resource, either</p>
+<blockquote>
+<div>&#8216;organizations/{org_id}&#8217; or &#8216;folders/{folder_id}&#8217;.</div></blockquote>
+<dl class="last docutils">
+<dt>show_deleted (bool): Determines if deleted folders should be</dt>
+<dd>returned in the results.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Folder dicts as returned by the API.</dd>
+<dt>Raises:</dt>
+<dd>ApiExecutionError: An error has occurred when executing the API.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_org_iam_policies">
+<code class="descname">get_org_iam_policies</code><span class="sig-paren">(</span><em>resource_name</em>, <em>org_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_org_iam_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_org_iam_policies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the iam policies of an org.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.
+org_id (int): The org id number.</dd>
+<dt>Returns:</dt>
+<dd>dict: Organization IAM policy for given org_id.
+<a class="reference external" href="https://cloud.google.com/resource-manager/reference/rest/Shared.Types/Policy">https://cloud.google.com/resource-manager/reference/rest/Shared.Types/Policy</a></dd>
+<dt>Raises:</dt>
+<dd>ApiExecutionError: An error has occurred when executing the API.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_organization">
+<code class="descname">get_organization</code><span class="sig-paren">(</span><em>org_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_organization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_organization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get organization by org_name.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>org_name (str): The org name with format &#8220;organizations/$ORG_ID&#8221;</dd>
+<dt>Returns:</dt>
+<dd>dict: The org response object if found, otherwise False.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_organizations">
+<code class="descname">get_organizations</code><span class="sig-paren">(</span><em>resource_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_organizations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_organizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get organizations that the authenticated account has access to.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Folder dicts as returned by the API.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_project">
+<code class="descname">get_project</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the projects from organization.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id (not project number).</dd>
+<dt>Returns:</dt>
+<dd>dict: The project response object.</dd>
+<dt>Raises:</dt>
+<dd>ApiExecutionError: An error has occurred when executing the API.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_project_ancestry">
+<code class="descname">get_project_ancestry</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_project_ancestry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_project_ancestry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the full folder ancestry for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): Either the project number or the project id.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>list: The ancesters of the project, in order from direct parent to</dt>
+<dd>root organization id.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_project_iam_policies">
+<code class="descname">get_project_iam_policies</code><span class="sig-paren">(</span><em>resource_name</em>, <em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_project_iam_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_project_iam_policies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the iam policies of given project numbers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.
+project_id (str): Either the project number or the project id.</dd>
+<dt>Returns:</dt>
+<dd>list: IAM policies of the project.
+<a class="reference external" href="https://cloud.google.com/resource-manager/reference/rest/Shared.Types/Policy">https://cloud.google.com/resource-manager/reference/rest/Shared.Types/Policy</a></dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_projects">
+<code class="descname">get_projects</code><span class="sig-paren">(</span><em>resource_name</em>, <em>parent_id=None</em>, <em>parent_type=None</em>, <em>**filterargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerClient.get_projects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerClient.get_projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the projects the authenticated account has access to.</p>
+<p>If no parent is passed in, then all projects the caller has visibility
+to are returned. This is significantly less efficient then listing by
+parent.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.
+parent_id (str): The id of the organization or folder parent object.
+parent_type (str): Either folder or organization.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>filterargs (dict): Extra project filter args.</dd>
+<dt>Yields:</dt>
+<dd>dict: The projects.list() response.
+<a class="reference external" href="https://cloud.google.com/resource-manager/reference/rest/v1/projects/list#response-body">https://cloud.google.com/resource-manager/reference/rest/v1/projects/list#response-body</a></dd>
+<dt>Raises:</dt>
+<dd>ApiExecutionError: An error has occurred when executing the API.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.cloud_resource_manager.</code><code class="descname">CloudResourceManagerRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=100.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloud_resource_manager.html#CloudResourceManagerRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Cloud Resource Manager Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient.folders">
+<code class="descname">folders</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient.folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ResourceManagerFoldersRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient.organizations">
+<code class="descname">organizations</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient.organizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ResourceManagerOrganizationsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient.projects">
+<code class="descname">projects</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloud_resource_manager.CloudResourceManagerRepositoryClient.projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ResourceManagerProjectsRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.cloudbilling">
+<span id="google-cloud-security-common-gcp-api-cloudbilling-module"></span><h2>google.cloud.security.common.gcp_api.cloudbilling module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.cloudbilling" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for Cloud Billing API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.cloudbilling.CloudBillingClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.cloudbilling.</code><code class="descname">CloudBillingClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloudbilling.html#CloudBillingClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudbilling.CloudBillingClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>CloudSQL Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloudbilling.CloudBillingClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 60.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudbilling.CloudBillingClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloudbilling.CloudBillingClient.get_billing_info">
+<code class="descname">get_billing_info</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloudbilling.html#CloudBillingClient.get_billing_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudbilling.CloudBillingClient.get_billing_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the biling information for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (int): The project id for a GCP project.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">dict: A ProjectBillingInfo resource.
+<a class="reference external" href="https://cloud.google.com/billing/reference/rest/v1/ProjectBillingInfo">https://cloud.google.com/billing/reference/rest/v1/ProjectBillingInfo</a></p>
+<dl class="docutils">
+<dt>{</dt>
+<dd>&#8220;name&#8221;: string,
+&#8220;projectId&#8221;: string,
+&#8220;billingAccountName&#8221;: string,
+&#8220;billingEnabled&#8221;: boolean,</dd>
+</dl>
+<p class="last">}</p>
+</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ApiExecutionError: ApiExecutionError is raised if the call to the</dt>
+<dd>GCP ClodSQL API fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.cloudbilling.CloudBillingRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.cloudbilling.</code><code class="descname">CloudBillingRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=60.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloudbilling.html#CloudBillingRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudbilling.CloudBillingRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Cloud Billing API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloudbilling.CloudBillingRepositoryClient.projects">
+<code class="descname">projects</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudbilling.CloudBillingRepositoryClient.projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _CloudBillingProjectsRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.cloudsql">
+<span id="google-cloud-security-common-gcp-api-cloudsql-module"></span><h2>google.cloud.security.common.gcp_api.cloudsql module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.cloudsql" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for SQL API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.cloudsql.CloudSqlRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.cloudsql.</code><code class="descname">CloudSqlRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=1.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloudsql.html#CloudSqlRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudsql.CloudSqlRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Cloud SQL Admin API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloudsql.CloudSqlRepositoryClient.instances">
+<code class="descname">instances</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudsql.CloudSqlRepositoryClient.instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _CloudSqlInstancesRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.cloudsql.CloudsqlClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.cloudsql.</code><code class="descname">CloudsqlClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloudsql.html#CloudsqlClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudsql.CloudsqlClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>CloudSQL Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.cloudsql.CloudsqlClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 100.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudsql.CloudsqlClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.cloudsql.CloudsqlClient.get_instances">
+<code class="descname">get_instances</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/cloudsql.html#CloudsqlClient.get_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.cloudsql.CloudsqlClient.get_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all CloudSQL instances for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (int): The project id for a GCP project.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">list: A list of database Instance resource dicts for a project_id.
+<a class="reference external" href="https://cloud.google.com/sql/docs/mysql/admin-api/v1beta4/instances">https://cloud.google.com/sql/docs/mysql/admin-api/v1beta4/instances</a></p>
+<dl class="last docutils">
+<dt>[{&#8220;kind&#8221;: &#8220;sql#instance&#8221;, &#8220;name&#8221;: &#8220;sql_instance1&#8221;, ...}</dt>
+<dd>{&#8220;kind&#8221;: &#8220;sql#instance&#8221;, &#8220;name&#8221;: &#8220;sql_instance2&#8221;, ...},
+{...}]</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ApiExecutionError: ApiExecutionError is raised if the call to the</dt>
+<dd>GCP ClodSQL API fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.compute">
+<span id="google-cloud-security-common-gcp-api-compute-module"></span><h2>google.cloud.security.common.gcp_api.compute module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.compute" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for Compute API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.compute.</code><code class="descname">ComputeClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Compute Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 1.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_backend_services">
+<code class="descname">get_backend_services</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_backend_services"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_backend_services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the backend services for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of backend services for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_disks">
+<code class="descname">get_disks</code><span class="sig-paren">(</span><em>project_id</em>, <em>zone=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_disks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_disks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of all disks in the project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">project_id (str): The project id.
+zone (str): An optional zone to query, if not provided then all</p>
+<blockquote class="last">
+<div>disks in all zones are returned.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>list: A list of disk resources for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_firewall_quota">
+<code class="descname">get_firewall_quota</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_firewall_quota"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_firewall_quota" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls get_quota to request the firewall quota
+Args:</p>
+<blockquote>
+<div>project_id (str): The project id.</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: The quota of a requested metric in a dict.</dt>
+<dd><p class="first">Example:
+{</p>
+<blockquote>
+<div>&#8220;metric&#8221;: &#8220;FIREWALLS&#8221;,
+&#8220;limit&#8221;: 100.0,
+&#8220;usage&#8221;: 9.0</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd>KeyError: Metric was not a firewall resource.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_firewall_rules">
+<code class="descname">get_firewall_rules</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_firewall_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_firewall_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the firewall rules for a given project id.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of firewall rules for this project id.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_forwarding_rules">
+<code class="descname">get_forwarding_rules</code><span class="sig-paren">(</span><em>project_id</em>, <em>region=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_forwarding_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_forwarding_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the forwarding rules for a project.</p>
+<p>If no region name is specified, use aggregatedList() to query for
+forwarding rules in all regions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.
+region (str): The region name.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of forwarding rules for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_global_operation">
+<code class="descname">get_global_operation</code><span class="sig-paren">(</span><em>project_id</em>, <em>operation_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_global_operation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_global_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Operations Status
+Args:</p>
+<blockquote>
+<div>project_id (str): The project id.
+operation_id (str): The operation id.</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>dict: Global Operation status and info.
+<a class="reference external" href="https://cloud.google.com/compute/docs/reference/latest/globalOperations/get">https://cloud.google.com/compute/docs/reference/latest/globalOperations/get</a></dd>
+<dt>Raises:</dt>
+<dd>ApiNotEnabledError: Returns if the api is not enabled.
+ApiExecutionError: Returns if the api is not executable.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_group_instances">
+<code class="descname">get_instance_group_instances</code><span class="sig-paren">(</span><em>project_id</em>, <em>instance_group_name</em>, <em>region=None</em>, <em>zone=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_instance_group_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_group_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the instance groups for a project.</p>
+<p>One and only one of zone (for zonal instance groups) and region
+(for regional instance groups) must be specified.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.
+instance_group_name (str): The instance group&#8217;s name.
+region (str): The regional instance group&#8217;s region.
+zone (str): The zonal instance group&#8217;s zone.</dd>
+<dt>Returns:</dt>
+<dd>list: instance URLs for this instance group.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: invalid combination of parameters</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_group_managers">
+<code class="descname">get_instance_group_managers</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_instance_group_managers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_group_managers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the instance group managers for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of instance group managers for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_groups">
+<code class="descname">get_instance_groups</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_instance_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the instance groups for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of instance groups for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_templates">
+<code class="descname">get_instance_templates</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_instance_templates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_instance_templates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the instance templates for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of instance templates for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_instances">
+<code class="descname">get_instances</code><span class="sig-paren">(</span><em>project_id</em>, <em>zone=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the instances for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.
+zone (str): The zone to list the instances in.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of instances for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_networks">
+<code class="descname">get_networks</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_networks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_networks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the networks list for a given project id.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of networks for this project id.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_project">
+<code class="descname">get_project</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the specified Project resource.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>dict: A Compute Project resource dict.
+<a class="reference external" href="https://cloud.google.com/compute/docs/reference/latest/projects/get">https://cloud.google.com/compute/docs/reference/latest/projects/get</a></dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_quota">
+<code class="descname">get_quota</code><span class="sig-paren">(</span><em>project_id</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_quota"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_quota" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the quota for any metric</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.
+metric (str): The metric name of the quota needed.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: The quota of a requested metric in a dict.</dt>
+<dd><p class="first">Example:
+{</p>
+<blockquote>
+<div>&#8220;metric&#8221;: &#8220;FIREWALLS&#8221;,
+&#8220;limit&#8221;: 100.0,
+&#8220;usage&#8221;: 9.0</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd>KeyError: Metric was not found in the project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.get_subnetworks">
+<code class="descname">get_subnetworks</code><span class="sig-paren">(</span><em>project_id</em>, <em>region=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.get_subnetworks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.get_subnetworks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of all subnetworks in the project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">project_id (str): The project id.
+region (str): An optional region to query, if not provided then all</p>
+<blockquote class="last">
+<div>subnetworks in all regions are returned.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>list: A list of subnetwork resources for this project.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeClient.is_api_enabled">
+<code class="descname">is_api_enabled</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeClient.is_api_enabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeClient.is_api_enabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the Compute API is enabled for the specified project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project id.</dd>
+<dt>Returns:</dt>
+<dd>bool: True if the API is enabled, else False.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.compute.</code><code class="descname">ComputeRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=100.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/compute.html#ComputeRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Compute API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.backend_services">
+<code class="descname">backend_services</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.backend_services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeBackendServicesRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.disks">
+<code class="descname">disks</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.disks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeDisksRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.firewalls">
+<code class="descname">firewalls</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.firewalls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeFirewallsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.forwarding_rules">
+<code class="descname">forwarding_rules</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.forwarding_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeForwardingRulesRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.global_operations">
+<code class="descname">global_operations</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.global_operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeGlobalOperationsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instance_group_managers">
+<code class="descname">instance_group_managers</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instance_group_managers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeInstanceGroupManagersRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instance_groups">
+<code class="descname">instance_groups</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instance_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeInstanceGroupsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instance_templates">
+<code class="descname">instance_templates</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instance_templates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeInstanceTemplatesRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instances">
+<code class="descname">instances</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeInstancesRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.networks">
+<code class="descname">networks</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.networks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeNetworksRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.projects">
+<code class="descname">projects</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeProjectsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.region_instance_groups">
+<code class="descname">region_instance_groups</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.region_instance_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeRegionInstanceGroupsRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.subnetworks">
+<code class="descname">subnetworks</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.compute.ComputeRepositoryClient.subnetworks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ComputeSubnetworksRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.container">
+<span id="google-cloud-security-common-gcp-api-container-module"></span><h2>google.cloud.security.common.gcp_api.container module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.container" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for SQL API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.container.</code><code class="descname">ContainerClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/container.html#ContainerClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Cloud Kubernetes Engine Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 100.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerClient.get_clusters">
+<code class="descname">get_clusters</code><span class="sig-paren">(</span><em>project_id</em>, <em>zone='-'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/container.html#ContainerClient.get_clusters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerClient.get_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the clusters and their node pools for a project and zone.</p>
+<p>If zone is not specified, it lists clusters for all zones in the
+project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">project_id (int): The project id for a GCP project.
+zone (str):  Name of the zone to get the configuration for. Use</p>
+<blockquote class="last">
+<div>&#8216;-&#8216; to return clusters from all zones.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd><p class="first">list: A list of Cluster dicts.
+<a class="reference external" href="https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.zones.clusters#Cluster">https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.zones.clusters#Cluster</a></p>
+<dl class="last docutils">
+<dt>[{&#8220;name&#8221;: &#8220;cluster-1&#8221;, ...}</dt>
+<dd>{&#8220;name&#8221;: &#8220;cluster-2&#8221;, ...},
+{...}]</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ApiExecutionError: ApiExecutionError is raised if the call to the</dt>
+<dd>GCP API fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerClient.get_serverconfig">
+<code class="descname">get_serverconfig</code><span class="sig-paren">(</span><em>project_id</em>, <em>zone</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/container.html#ContainerClient.get_serverconfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerClient.get_serverconfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the serverconfig for a project and zone.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (int): The project id for a GCP project.
+zone (str):  Name of the zone to get the configuration for.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">dict: A serverconfig for a given Compute Engine zone.
+<a class="reference external" href="https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.zones/getServerconfig">https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.zones/getServerconfig</a></p>
+<dl class="docutils">
+<dt>{</dt>
+<dd><p class="first">&#8220;defaultClusterVersion&#8221;: string,
+&#8220;validNodeVersions&#8221;: [</p>
+<blockquote>
+<div>string</div></blockquote>
+<p>],
+&#8220;defaultImageType&#8221;: string,
+&#8220;validImageTypes&#8221;: [</p>
+<blockquote>
+<div>string</div></blockquote>
+<p>],
+&#8220;validMasterVersions&#8221;: [</p>
+<blockquote>
+<div>string</div></blockquote>
+<p class="last">],</p>
+</dd>
+</dl>
+<p class="last">}</p>
+</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ApiExecutionError: ApiExecutionError is raised if the call to the</dt>
+<dd>GCP API fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.container.</code><code class="descname">ContainerRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=100.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/container.html#ContainerRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Cloud Kubernetes Engine API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerRepositoryClient.projects_zones">
+<code class="descname">projects_zones</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerRepositoryClient.projects_zones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ContainerProjectsZonesRepository instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.container.ContainerRepositoryClient.projects_zones_clusters">
+<code class="descname">projects_zones_clusters</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.container.ContainerRepositoryClient.projects_zones_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a _ContainerProjectsZonesClustersRepository instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.errors">
+<span id="google-cloud-security-common-gcp-api-errors-module"></span><h2>google.cloud.security.common.gcp_api.errors module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.errors" title="Permalink to this headline">¶</a></h2>
+<p>API errors.</p>
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.ApiExecutionError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">ApiExecutionError</code><span class="sig-paren">(</span><em>resource_name</em>, <em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#ApiExecutionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.ApiExecutionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>Error for API executions.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.errors.ApiExecutionError.CUSTOM_ERROR_MESSAGE">
+<code class="descname">CUSTOM_ERROR_MESSAGE</code><em class="property"> = 'GCP API Error: unable to get {0} from GCP:\n{1}\n{2}'</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.ApiExecutionError.CUSTOM_ERROR_MESSAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.ApiInitializationError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">ApiInitializationError</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#ApiInitializationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.ApiInitializationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>Error initializing the API.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.ApiNotEnabledError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">ApiNotEnabledError</code><span class="sig-paren">(</span><em>error_url</em>, <em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#ApiNotEnabledError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.ApiNotEnabledError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>The requested API is not enabled on this project.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.errors.ApiNotEnabledError.CUSTOM_ERROR_MESSAGE">
+<code class="descname">CUSTOM_ERROR_MESSAGE</code><em class="property"> = 'GCP API Error; API not enabled, turn it on at {0}:\n{1}'</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.ApiNotEnabledError.CUSTOM_ERROR_MESSAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.Error">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">Error</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base Error class.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.InvalidBucketPathError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">InvalidBucketPathError</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#InvalidBucketPathError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.InvalidBucketPathError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>Invalid GCS bucket path.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.PaginationNotSupportedError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">PaginationNotSupportedError</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#PaginationNotSupportedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.PaginationNotSupportedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>Paged Query was issued against an API that does not support paging.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.UnsupportedApiError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">UnsupportedApiError</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#UnsupportedApiError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.UnsupportedApiError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>Error for unsupported API.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.gcp_api.errors.UnsupportedApiVersionError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.gcp_api.errors.</code><code class="descname">UnsupportedApiVersionError</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/errors.html#UnsupportedApiVersionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.errors.UnsupportedApiVersionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.errors.Error" title="google.cloud.security.common.gcp_api.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.errors.Error</span></code></a></p>
+<p>Error for unsupported API version.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.iam">
+<span id="google-cloud-security-common-gcp-api-iam-module"></span><h2>google.cloud.security.common.gcp_api.iam module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.iam" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for IAM API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.iam.</code><code class="descname">IAMClient</code><span class="sig-paren">(</span><em>global_configs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/iam.html#IAMClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>IAM Client.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.DEFAULT_QUOTA_PERIOD">
+<code class="descname">DEFAULT_QUOTA_PERIOD</code><em class="property"> = 1.0</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.DEFAULT_QUOTA_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.KEY_TYPES">
+<code class="descname">KEY_TYPES</code><em class="property"> = frozenset(['USER_MANAGED', 'SYSTEM_MANAGED'])</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.KEY_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.SYSTEM_MANAGED">
+<code class="descname">SYSTEM_MANAGED</code><em class="property"> = 'SYSTEM_MANAGED'</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.SYSTEM_MANAGED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.USER_MANAGED">
+<code class="descname">USER_MANAGED</code><em class="property"> = 'USER_MANAGED'</em><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.USER_MANAGED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.get_service_account_iam_policy">
+<code class="descname">get_service_account_iam_policy</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/iam.html#IAMClient.get_service_account_iam_policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.get_service_account_iam_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get IAM policy associated with a service account.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>name (str): The service account name to query, must be in the format</dt>
+<dd>projects/{PROJECT_ID}/serviceAccounts/{SERVICE_ACCOUNT_EMAIL}</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>dict: The IAM policies for the service account.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.get_service_account_keys">
+<code class="descname">get_service_account_keys</code><span class="sig-paren">(</span><em>name</em>, <em>key_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/iam.html#IAMClient.get_service_account_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.get_service_account_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get keys associated with the given Service Account.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>name (str): The service account name to query, must be in the format</dt>
+<dd>projects/{PROJECT_ID}/serviceAccounts/{SERVICE_ACCOUNT_EMAIL}</dd>
+<dt>key_type (str): Optional, the key type to include in the results.</dt>
+<dd>Can be None, USER_MANAGED or SYSTEM_MANAGED. Defaults to
+returning all key types.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>list: List with a dict for each key associated with the account.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: Raised if an invalid key_type is specified.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.iam.IAMClient.get_service_accounts">
+<code class="descname">get_service_accounts</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/iam.html#IAMClient.get_service_accounts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IAMClient.get_service_accounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Service Accounts associated with a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The project ID to get Service Accounts for.</dd>
+<dt>Returns:</dt>
+<dd>list: List of service accounts associated with the project.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.iam.IamRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.iam.</code><code class="descname">IamRepositoryClient</code><span class="sig-paren">(</span><em>quota_max_calls=None</em>, <em>quota_period=1.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/iam.html#IamRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IamRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>IAM API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.iam.IamRepositoryClient.projects_serviceaccounts">
+<code class="descname">projects_serviceaccounts</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IamRepositoryClient.projects_serviceaccounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>An _IamProjectsServiceAccountsRepository instance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>object: An _IamProjectsServiceAccountsRepository instance.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.iam.IamRepositoryClient.projects_serviceaccounts_keys">
+<code class="descname">projects_serviceaccounts_keys</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.iam.IamRepositoryClient.projects_serviceaccounts_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>An _IamProjectsServiceAccountsKeysRepository instance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>object: An _IamProjectsServiceAccountsKeysRepository instance.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.repository_mixins">
+<span id="google-cloud-security-common-gcp-api-repository-mixins-module"></span><h2>google.cloud.security.common.gcp_api.repository_mixins module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.repository_mixins" title="Permalink to this headline">¶</a></h2>
+<p>Mixin classes for _base_repository.GCPRepository implementations.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.AggregatedListQueryMixin">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.repository_mixins.</code><code class="descname">AggregatedListQueryMixin</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#AggregatedListQueryMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.AggregatedListQueryMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin" title="google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin</span></code></a></p>
+<p>Mixin that implements a paged AggregatedList query.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.AggregatedListQueryMixin.aggregated_list">
+<code class="descname">aggregated_list</code><span class="sig-paren">(</span><em>resource=None</em>, <em>fields=None</em>, <em>max_results=None</em>, <em>verb='aggregatedList'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#AggregatedListQueryMixin.aggregated_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.AggregatedListQueryMixin.aggregated_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all subresource entities of a given resource.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>self (GCPRespository): An instance of a GCPRespository class.
+resource (str): The id of the resource to query.
+fields (str): Fields to include in the response - partial response.
+max_results (int): Number of entries to include per page.
+verb (str): The method to call on the API.
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs (dict): Optional additional arguments to pass to the query.</dd>
+<dt>Returns:</dt>
+<dd>iterator: An iterator of API responses by page.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.GetIamPolicyQueryMixin">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.repository_mixins.</code><code class="descname">GetIamPolicyQueryMixin</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#GetIamPolicyQueryMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.GetIamPolicyQueryMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Mixin that implements getIamPolicy query.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.GetIamPolicyQueryMixin.get_iam_policy">
+<code class="descname">get_iam_policy</code><span class="sig-paren">(</span><em>resource</em>, <em>fields=None</em>, <em>verb='getIamPolicy'</em>, <em>include_body=True</em>, <em>resource_field='resource'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#GetIamPolicyQueryMixin.get_iam_policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.GetIamPolicyQueryMixin.get_iam_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get resource IAM Policy.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">self (GCPRespository): An instance of a GCPRespository class.
+resource (str): The id of the resource to fetch.
+fields (str): Fields to include in the response - partial response.
+verb (str): The method to call on the API.
+include_body (bool): If true, include an empty body parameter in the</p>
+<blockquote>
+<div>method args.</div></blockquote>
+<dl class="docutils">
+<dt>resource_field (str): The parameter name of the resource field to</dt>
+<dd>pass to the method.</dd>
+</dl>
+<p class="last"><a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs (dict): Optional additional arguments to pass to the query.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>dict: Response from the API.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>errors.HttpError: When attempting to get a non-existent entity.</dt>
+<dd><dl class="first last docutils">
+<dt>ex: HttpError 404 when requesting ... returned</dt>
+<dd>&#8220;The resource &#8216;...&#8217; was not found&#8221;</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.GetQueryMixin">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.repository_mixins.</code><code class="descname">GetQueryMixin</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#GetQueryMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.GetQueryMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Mixin that implements Get query.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.GetQueryMixin.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>resource</em>, <em>target=None</em>, <em>fields=None</em>, <em>verb='get'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#GetQueryMixin.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.GetQueryMixin.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get API entity.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>self (GCPRespository): An instance of a GCPRespository class.
+resource (str): The id of the resource to query.
+target (str):  Name of the entity to fetch.
+fields (str): Fields to include in the response - partial response.
+verb (str): The method to call on the API.
+<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs (dict): Optional additional arguments to pass to the query.</dd>
+<dt>Returns:</dt>
+<dd>dict: Response from the API.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ValueError: When get_key_field was not defined in the base</dt>
+<dd>GCPRepository instance.</dd>
+<dt>errors.HttpError: When attempting to get a non-existent entity.</dt>
+<dd><dl class="first last docutils">
+<dt>ex: HttpError 404 when requesting ... returned</dt>
+<dd>&#8220;The resource &#8216;...&#8217; was not found&#8221;</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.repository_mixins.</code><code class="descname">ListQueryMixin</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#ListQueryMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Mixin that implements paged List query.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin.list">
+<code class="descname">list</code><span class="sig-paren">(</span><em>resource=None</em>, <em>fields=None</em>, <em>max_results=None</em>, <em>verb='list'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#ListQueryMixin.list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.ListQueryMixin.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List subresources of a given resource.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>self (GCPRespository): An instance of a GCPRespository class.
+resource (str): The id of the resource to query.
+fields (str): Fields to include in the response - partial response.
+max_results (int): Number of entries to include per page.
+verb (str): The method to call on the API.
+<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs (dict): Optional additional arguments to pass to the query.</dd>
+<dt>Yields:</dt>
+<dd>dict: An API response containing one page of results.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.SearchQueryMixin">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.repository_mixins.</code><code class="descname">SearchQueryMixin</code><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#SearchQueryMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.SearchQueryMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Mixin that implements a paged Search query.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.repository_mixins.SearchQueryMixin.search">
+<code class="descname">search</code><span class="sig-paren">(</span><em>query=None</em>, <em>fields=None</em>, <em>max_results=500</em>, <em>verb='search'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/repository_mixins.html#SearchQueryMixin.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.repository_mixins.SearchQueryMixin.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all subresource entities visable to the caller.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">self (GCPRespository): An instance of a GCPRespository class.
+query (str): Additional filters to apply to the restrict the</p>
+<blockquote>
+<div>set of resources returned.</div></blockquote>
+<p class="last">fields (str): Fields to include in the response - partial response.
+max_results (int): Number of entries to include per page.
+verb (str): The method to call on the API.</p>
+</dd>
+<dt>Yields:</dt>
+<dd>dict: An API response containing one page of results.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api.storage">
+<span id="google-cloud-security-common-gcp-api-storage-module"></span><h2>google.cloud.security.common.gcp_api.storage module<a class="headerlink" href="#module-google.cloud.security.common.gcp_api.storage" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for Storage API client.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.storage.</code><code class="descname">StorageClient</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Storage Client.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient.get_bucket_iam_policy">
+<code class="descname">get_bucket_iam_policy</code><span class="sig-paren">(</span><em>bucket</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient.get_bucket_iam_policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient.get_bucket_iam_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the IAM policy for a bucket.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>bucket (str): The bucket to fetch the policy for.</dd>
+<dt>Returns:</dt>
+<dd>dict: The IAM policies for the bucket.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient.get_buckets">
+<code class="descname">get_buckets</code><span class="sig-paren">(</span><em>project_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient.get_buckets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient.get_buckets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all GCS buckets for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (int): The project id for a GCP project.</dd>
+<dt>Returns:</dt>
+<dd>list: a list of bucket resource dicts.
+<a class="reference external" href="https://cloud.google.com/storage/docs/json_api/v1/buckets">https://cloud.google.com/storage/docs/json_api/v1/buckets</a></dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ApiExecutionError: ApiExecutionError is raised if the call to the</dt>
+<dd>GCP ClodSQL API fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient.get_object_iam_policy">
+<code class="descname">get_object_iam_policy</code><span class="sig-paren">(</span><em>bucket</em>, <em>object_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient.get_object_iam_policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient.get_object_iam_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the IAM policy for an object.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>bucket (str): The bucket to fetch the policy for.
+object_name (str): The object name to fetch the policy for.</dd>
+<dt>Returns:</dt>
+<dd>dict: The IAM policies for the object.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient.get_objects">
+<code class="descname">get_objects</code><span class="sig-paren">(</span><em>bucket</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient.get_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient.get_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all GCS buckets for a project.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>bucket (str): The bucket to list to objects in.</dd>
+<dt>Returns:</dt>
+<dd>list: a list of object resource dicts.
+<a class="reference external" href="https://cloud.google.com/storage/docs/json_api/v1/objects">https://cloud.google.com/storage/docs/json_api/v1/objects</a></dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ApiExecutionError: ApiExecutionError is raised if the call to the</dt>
+<dd>GCP ClodSQL API fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient.get_text_file">
+<code class="descname">get_text_file</code><span class="sig-paren">(</span><em>full_bucket_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient.get_text_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient.get_text_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a text file object as a string.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>full_bucket_path (str): The full path of the bucket object.</dd>
+<dt>Returns:</dt>
+<dd>str: The object&#8217;s content as a string.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>HttpError: HttpError is raised if the call to the GCP storage API</dt>
+<dd>fails</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageClient.put_text_file">
+<code class="descname">put_text_file</code><span class="sig-paren">(</span><em>local_file_path</em>, <em>full_bucket_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageClient.put_text_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageClient.put_text_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put a text object into a bucket.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>local_file_path (str): The local path of the file to upload.
+full_bucket_path (str): The full GCS path for the output.</dd>
+<dt>Returns:</dt>
+<dd>dict: The uploaded object&#8217;s resource metadata.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageRepositoryClient">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.gcp_api.storage.</code><code class="descname">StorageRepositoryClient</code><span class="sig-paren">(</span><em>credentials=None</em>, <em>quota_max_calls=None</em>, <em>quota_period=1.0</em>, <em>use_rate_limiter=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#StorageRepositoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageRepositoryClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.gcp_api._base_repository.BaseRepositoryClient</span></code></p>
+<p>Storage API Respository.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageRepositoryClient.buckets">
+<code class="descname">buckets</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageRepositoryClient.buckets" title="Permalink to this definition">¶</a></dt>
+<dd><p>An _StorageBucketsRepository instance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>object: An _StorageBucketsRepository instance.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.gcp_api.storage.StorageRepositoryClient.objects">
+<code class="descname">objects</code><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.StorageRepositoryClient.objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>An _StorageObjectsRepository instance.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>object: An _StorageObjectsRepository instance.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.gcp_api.storage.get_bucket_and_path_from">
+<code class="descclassname">google.cloud.security.common.gcp_api.storage.</code><code class="descname">get_bucket_and_path_from</code><span class="sig-paren">(</span><em>full_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/gcp_api/storage.html#get_bucket_and_path_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.gcp_api.storage.get_bucket_and_path_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the bucket and object path.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>full_path (str): The full GCS path. Must be in the format</dt>
+<dd>gs://bucket-name/path/to/object</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>tuple: The bucket name and object path.</dt>
+<dd>Ex. (bucket-name, path/to/object)</dd>
+</dl>
+</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>InvalidBucketPathError: Raised if the full path cannot be parsed or</dt>
+<dd>does not look like a GCS bucket URL.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.gcp_api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-google.cloud.security.common.gcp_api" title="Permalink to this headline">¶</a></h2>
+<p>Google Cloud Platform APIs.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">google.cloud.security.common.gcp_api package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.admin_directory">google.cloud.security.common.gcp_api.admin_directory module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.api_helpers">google.cloud.security.common.gcp_api.api_helpers module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.appengine">google.cloud.security.common.gcp_api.appengine module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.bigquery">google.cloud.security.common.gcp_api.bigquery module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.cloud_resource_manager">google.cloud.security.common.gcp_api.cloud_resource_manager module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.cloudbilling">google.cloud.security.common.gcp_api.cloudbilling module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.cloudsql">google.cloud.security.common.gcp_api.cloudsql module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.compute">google.cloud.security.common.gcp_api.compute module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.container">google.cloud.security.common.gcp_api.container module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.errors">google.cloud.security.common.gcp_api.errors module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.iam">google.cloud.security.common.gcp_api.iam module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.repository_mixins">google.cloud.security.common.gcp_api.repository_mixins module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api.storage">google.cloud.security.common.gcp_api.storage module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.gcp_api">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/google.cloud.security.common.gcp_api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/source/google.cloud.security.common.gcp_api.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

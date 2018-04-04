@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.util.log_util &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.common.util.log_util</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;A basic util that wraps logging.</span>
+
+<span class="sd">Setup logging for Forseti Security. Logs to console and syslog.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">logging.handlers</span>
+
+
+<span class="n">DEFAULT_LOG_FMT</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> </span><span class="si">%(name)-12s</span><span class="s1"> </span><span class="si">%(levelname)-8s</span><span class="s1"> &#39;</span>
+                   <span class="s1">&#39;</span><span class="si">%(funcName)s</span><span class="s1"> </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">SYSLOG_LOG_FMT</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;[forseti-security] </span><span class="si">%(name)-12s</span><span class="s1"> </span><span class="si">%(levelname)-8s</span><span class="s1"> &#39;</span>
+                  <span class="s1">&#39;</span><span class="si">%(funcName)s</span><span class="s1"> </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">LOGGERS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">LOGLEVELS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;debug&#39;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+    <span class="s1">&#39;info&#39;</span> <span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="s1">&#39;warning&#39;</span> <span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
+    <span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">LOGLEVEL</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+
+
+<div class="viewcode-block" id="get_logger"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.util.html#google.cloud.security.common.util.log_util.get_logger">[docs]</a><span class="k">def</span> <span class="nf">get_logger</span><span class="p">(</span><span class="n">module_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Setup the logger.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        module_name (str): The name of the mdule to describe the log entry.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        logger: An instance of the configured logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Move this into a configuration file.</span>
+    <span class="n">console_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">console_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">DEFAULT_LOG_FMT</span><span class="p">))</span>
+
+    <span class="n">syslog_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">SysLogHandler</span><span class="p">()</span>
+    <span class="n">syslog_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">SYSLOG_LOG_FMT</span><span class="p">))</span>
+
+    <span class="n">logger_instance</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+    <span class="n">logger_instance</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console_handler</span><span class="p">)</span>
+    <span class="n">logger_instance</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">syslog_handler</span><span class="p">)</span>
+    <span class="n">logger_instance</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">LOGLEVEL</span><span class="p">)</span>
+    <span class="n">LOGGERS</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">logger_instance</span>
+    <span class="k">return</span> <span class="n">logger_instance</span></div>
+
+<span class="k">def</span> <span class="nf">_map_logger</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map function to current loggers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (function): Function to call on every logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">LOGGERS</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+        <span class="n">func</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+
+<div class="viewcode-block" id="set_logger_level"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.util.html#google.cloud.security.common.util.log_util.set_logger_level">[docs]</a><span class="k">def</span> <span class="nf">set_logger_level</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Modify log level of existing loggers as well as the default</span>
+<span class="sd">       for new loggers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        level (int): The log level to set the loggers to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pylint: disable=global-statement</span>
+    <span class="k">global</span> <span class="n">LOGLEVEL</span>
+    <span class="n">LOGLEVEL</span> <span class="o">=</span> <span class="n">level</span>
+    <span class="n">_map_logger</span><span class="p">(</span><span class="k">lambda</span> <span class="n">logger</span><span class="p">:</span> <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="set_logger_level_from_config"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.util.html#google.cloud.security.common.util.log_util.set_logger_level_from_config">[docs]</a><span class="k">def</span> <span class="nf">set_logger_level_from_config</span><span class="p">(</span><span class="n">level_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the logger level from a config value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        level_name (str): The log level name. The accepted values are</span>
+<span class="sd">            in the LOGLEVELS variable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">set_logger_level</span><span class="p">(</span><span class="n">LOGLEVELS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">level_name</span><span class="p">,</span> <span class="n">LOGLEVEL</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

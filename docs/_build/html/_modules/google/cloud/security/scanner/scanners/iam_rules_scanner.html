@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.scanner.scanners.iam_rules_scanner &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.scanner.scanners.iam_rules_scanner</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Scanner for the IAM rules engine.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">csv_writer</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">db_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">folder_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">organization_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">project_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.gcp_type.resource</span> <span class="kn">import</span> <span class="n">ResourceType</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.notifier</span> <span class="kn">import</span> <span class="n">notifier</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.scanner.audit</span> <span class="kn">import</span> <span class="n">iam_rules_engine</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.scanner.scanners</span> <span class="kn">import</span> <span class="n">base_scanner</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="IamPolicyScanner"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.scanner.scanners.html#google.cloud.security.scanner.scanners.iam_rules_scanner.IamPolicyScanner">[docs]</a><span class="k">class</span> <span class="nc">IamPolicyScanner</span><span class="p">(</span><span class="n">base_scanner</span><span class="o">.</span><span class="n">BaseScanner</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scanner for IAM data.&quot;&quot;&quot;</span>
+
+    <span class="n">SCANNER_OUTPUT_CSV_FMT</span> <span class="o">=</span> <span class="s1">&#39;scanner_output_iam.{}.csv&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_configs</span><span class="p">,</span> <span class="n">scanner_configs</span><span class="p">,</span> <span class="n">snapshot_timestamp</span><span class="p">,</span>
+                 <span class="n">rules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            global_configs (dict): Global configurations.</span>
+<span class="sd">            scanner_configs (dict): Scanner configurations.</span>
+<span class="sd">            snapshot_timestamp (str): Timestamp, formatted as YYYYMMDDTHHMMSSZ.</span>
+<span class="sd">            rules (str): Fully-qualified path and filename of the rules file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IamPolicyScanner</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">global_configs</span><span class="p">,</span>
+            <span class="n">scanner_configs</span><span class="p">,</span>
+            <span class="n">snapshot_timestamp</span><span class="p">,</span>
+            <span class="n">rules</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules_engine</span> <span class="o">=</span> <span class="n">iam_rules_engine</span><span class="o">.</span><span class="n">IamRulesEngine</span><span class="p">(</span>
+            <span class="n">rules_file_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">,</span>
+            <span class="n">snapshot_timestamp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules_engine</span><span class="o">.</span><span class="n">build_rule_book</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_flatten_violations</span><span class="p">(</span><span class="n">violations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flatten RuleViolations into a dict for each RuleViolation member.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            violations (list): The RuleViolations to flatten.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            dict: Iterator of RuleViolations as a dict per member.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">violation</span> <span class="ow">in</span> <span class="n">violations</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">violation</span><span class="o">.</span><span class="n">members</span><span class="p">:</span>
+                <span class="n">violation_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">violation_data</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">violation</span><span class="o">.</span><span class="n">role</span>
+                <span class="n">violation_data</span><span class="p">[</span><span class="s1">&#39;member&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="k">yield</span> <span class="p">{</span>
+                    <span class="s1">&#39;resource_id&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span>
+                    <span class="s1">&#39;resource_type&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">resource_type</span><span class="p">,</span>
+                    <span class="s1">&#39;rule_index&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">rule_index</span><span class="p">,</span>
+                    <span class="s1">&#39;rule_name&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">rule_name</span><span class="p">,</span>
+                    <span class="s1">&#39;violation_type&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">violation_type</span><span class="p">,</span>
+                    <span class="s1">&#39;violation_data&#39;</span><span class="p">:</span> <span class="n">violation_data</span>
+                <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_output_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_violations</span><span class="p">,</span> <span class="n">resource_counts</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Output results.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            all_violations (list): A list of violations</span>
+<span class="sd">            resource_counts (dict): Resource count map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s1">&#39;violations&#39;</span>
+
+        <span class="n">all_violations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flatten_violations</span><span class="p">(</span><span class="n">all_violations</span><span class="p">))</span>
+        <span class="n">violation_errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_results_to_db</span><span class="p">(</span><span class="n">all_violations</span><span class="p">)</span>
+
+        <span class="c1"># Write the CSV for all the violations.</span>
+        <span class="c1"># TODO: Move this into the base class? The IAP scanner version of this</span>
+        <span class="c1"># is a wholesale copy.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanner_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_path&#39;</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing violations to csv...&#39;</span><span class="p">)</span>
+            <span class="n">output_csv_name</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">with</span> <span class="n">csv_writer</span><span class="o">.</span><span class="n">write_csv</span><span class="p">(</span>
+                <span class="n">resource_name</span><span class="o">=</span><span class="n">resource_name</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">all_violations</span><span class="p">,</span>
+                <span class="n">write_header</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_file</span><span class="p">:</span>
+                <span class="n">output_csv_name</span> <span class="o">=</span> <span class="n">csv_file</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;CSV filename: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">output_csv_name</span><span class="p">)</span>
+
+                <span class="c1"># Scanner timestamp for output file and email.</span>
+                <span class="n">now_utc</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+                <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanner_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_path&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">output_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;gs://&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">scanner_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_path&#39;</span><span class="p">)):</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+                    <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_upload_csv</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">now_utc</span><span class="p">,</span> <span class="n">output_csv_name</span><span class="p">)</span>
+
+                <span class="c1"># Send summary email.</span>
+                <span class="c1"># TODO: Untangle this email by looking for the csv content</span>
+                <span class="c1"># from the saved copy.</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_recipient&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;email_description&#39;</span><span class="p">:</span> <span class="s1">&#39;Policy Scan&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;email_sender&#39;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_sender&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;email_recipient&#39;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_recipient&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;sendgrid_api_key&#39;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sendgrid_api_key&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;output_csv_name&#39;</span><span class="p">:</span> <span class="n">output_csv_name</span><span class="p">,</span>
+                        <span class="s1">&#39;output_filename&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_output_filename</span><span class="p">(</span><span class="n">now_utc</span><span class="p">),</span>
+                        <span class="s1">&#39;now_utc&#39;</span><span class="p">:</span> <span class="n">now_utc</span><span class="p">,</span>
+                        <span class="s1">&#39;all_violations&#39;</span><span class="p">:</span> <span class="n">all_violations</span><span class="p">,</span>
+                        <span class="s1">&#39;resource_counts&#39;</span><span class="p">:</span> <span class="n">resource_counts</span><span class="p">,</span>
+                        <span class="s1">&#39;violation_errors&#39;</span><span class="p">:</span> <span class="n">violation_errors</span>
+                    <span class="p">}</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;scanner_done&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="n">payload</span>
+                    <span class="p">}</span>
+                    <span class="n">notifier</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_find_violations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policies</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find violations in the policies.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            policies (list): The list of (resource, policy) tuples to</span>
+<span class="sd">                find violations in.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of all violations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">policies</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">policies</span><span class="p">)</span>
+        <span class="n">all_violations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finding IAM policy violations...&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">policy</span><span class="p">)</span> <span class="ow">in</span> <span class="n">policies</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> =&gt; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">policy</span><span class="p">)</span>
+            <span class="n">violations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules_engine</span><span class="o">.</span><span class="n">find_policy_violations</span><span class="p">(</span>
+                <span class="n">resource</span><span class="p">,</span> <span class="n">policy</span><span class="p">)</span>
+            <span class="n">all_violations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">violations</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">all_violations</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_resource_count</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get resource count for IAM policies.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kwargs: The policies to get resource counts for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Resource count map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resource_counts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">ResourceType</span><span class="o">.</span><span class="n">ORGANIZATION</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;org_iam_policies&#39;</span><span class="p">,</span> <span class="p">[])),</span>
+            <span class="n">ResourceType</span><span class="o">.</span><span class="n">FOLDER</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;folder_iam_policies&#39;</span><span class="p">,</span> <span class="p">[])),</span>
+            <span class="n">ResourceType</span><span class="o">.</span><span class="n">PROJECT</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;project_iam_policies&#39;</span><span class="p">,</span> <span class="p">[])),</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">resource_counts</span>
+
+    <span class="k">def</span> <span class="nf">_get_org_iam_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get orgs from data source.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Org policies from inventory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">org_policies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">org_dao</span> <span class="o">=</span> <span class="n">organization_dao</span><span class="o">.</span><span class="n">OrganizationDao</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+            <span class="n">org_policies</span> <span class="o">=</span> <span class="n">org_dao</span><span class="o">.</span><span class="n">get_org_iam_policies</span><span class="p">(</span>
+                <span class="s1">&#39;organizations&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">db_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error getting Organization IAM policies: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">org_policies</span>
+
+    <span class="k">def</span> <span class="nf">_get_folder_iam_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get folder IAM policies from data source.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: The folder policies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">folder_policies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fdao</span> <span class="o">=</span> <span class="n">folder_dao</span><span class="o">.</span><span class="n">FolderDao</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+            <span class="n">folder_policies</span> <span class="o">=</span> <span class="n">fdao</span><span class="o">.</span><span class="n">get_folder_iam_policies</span><span class="p">(</span>
+                <span class="s1">&#39;folders&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">db_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error getting Folder IAM policies: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">folder_policies</span>
+
+    <span class="k">def</span> <span class="nf">_get_project_iam_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get projects from data source.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Project policies from inventory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">project_policies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">project_policies</span> <span class="o">=</span> <span class="p">(</span><span class="n">project_dao</span>
+                            <span class="o">.</span><span class="n">ProjectDao</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">get_project_policies</span><span class="p">(</span><span class="s1">&#39;projects&#39;</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_timestamp</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">project_policies</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the data for scanner.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of IAM policy data.</span>
+<span class="sd">            dict: A dict of resource counts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">policy_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">org_policies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_org_iam_policies</span><span class="p">()</span>
+        <span class="n">folder_policies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_folder_iam_policies</span><span class="p">()</span>
+        <span class="n">project_policies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_project_iam_policies</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">org_policies</span><span class="p">,</span> <span class="n">folder_policies</span><span class="p">,</span> <span class="n">project_policies</span><span class="p">]):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No policies found. Exiting.&#39;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">resource_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_resource_count</span><span class="p">(</span>
+            <span class="n">org_iam_policies</span><span class="o">=</span><span class="n">org_policies</span><span class="p">,</span>
+            <span class="n">folder_iam_policies</span><span class="o">=</span><span class="n">folder_policies</span><span class="p">,</span>
+            <span class="n">project_iam_policies</span><span class="o">=</span><span class="n">project_policies</span><span class="p">)</span>
+        <span class="n">policy_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">org_policies</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+        <span class="n">policy_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folder_policies</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+        <span class="n">policy_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">project_policies</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">policy_data</span><span class="p">,</span> <span class="n">resource_counts</span>
+
+<div class="viewcode-block" id="IamPolicyScanner.run"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.scanner.scanners.html#google.cloud.security.scanner.scanners.iam_rules_scanner.IamPolicyScanner.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs the data collection.&quot;&quot;&quot;</span>
+
+        <span class="n">policy_data</span><span class="p">,</span> <span class="n">resource_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve</span><span class="p">()</span>
+        <span class="n">all_violations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_violations</span><span class="p">(</span><span class="n">policy_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_results</span><span class="p">(</span><span class="n">all_violations</span><span class="p">,</span> <span class="n">resource_counts</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

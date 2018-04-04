@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.scanner.scanners.cloudsql_rules_scanner &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.scanner.scanners.cloudsql_rules_scanner</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Scanner for the CloudSQL acls rules engine.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">cloudsql_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.gcp_type.resource</span> <span class="kn">import</span> <span class="n">ResourceType</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.scanner.audit</span> <span class="kn">import</span> <span class="n">cloudsql_rules_engine</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.scanner.scanners</span> <span class="kn">import</span> <span class="n">base_scanner</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CloudSqlAclScanner"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.scanner.scanners.html#google.cloud.security.scanner.scanners.cloudsql_rules_scanner.CloudSqlAclScanner">[docs]</a><span class="k">class</span> <span class="nc">CloudSqlAclScanner</span><span class="p">(</span><span class="n">base_scanner</span><span class="o">.</span><span class="n">BaseScanner</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scanner for CloudSQL acls,&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_configs</span><span class="p">,</span> <span class="n">scanner_configs</span><span class="p">,</span> <span class="n">snapshot_timestamp</span><span class="p">,</span>
+                 <span class="n">rules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            global_configs (dict): Global configurations.</span>
+<span class="sd">            scanner_configs (dict): Scanner configurations.</span>
+<span class="sd">            snapshot_timestamp (str): Timestamp, formatted as YYYYMMDDTHHMMSSZ.</span>
+<span class="sd">            rules (str): Fully-qualified path and filename of the rules file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CloudSqlAclScanner</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">global_configs</span><span class="p">,</span>
+            <span class="n">scanner_configs</span><span class="p">,</span>
+            <span class="n">snapshot_timestamp</span><span class="p">,</span>
+            <span class="n">rules</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules_engine</span> <span class="o">=</span> <span class="n">cloudsql_rules_engine</span><span class="o">.</span><span class="n">CloudSqlRulesEngine</span><span class="p">(</span>
+            <span class="n">rules_file_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">,</span>
+            <span class="n">snapshot_timestamp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules_engine</span><span class="o">.</span><span class="n">build_rule_book</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_flatten_violations</span><span class="p">(</span><span class="n">violations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flatten RuleViolations into a dict for each RuleViolation member.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            violations (list): The RuleViolations to flatten.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            dict: Iterator of RuleViolations as a dict per member.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">violation</span> <span class="ow">in</span> <span class="n">violations</span><span class="p">:</span>
+            <span class="n">violation_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">violation_data</span><span class="p">[</span><span class="s1">&#39;instance_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">violation</span><span class="o">.</span><span class="n">instance_name</span>
+            <span class="n">violation_data</span><span class="p">[</span><span class="s1">&#39;authorized_networks&#39;</span><span class="p">]</span> <span class="o">=</span>\
+                                                  <span class="n">violation</span><span class="o">.</span><span class="n">authorized_networks</span>
+            <span class="n">violation_data</span><span class="p">[</span><span class="s1">&#39;ssl_enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">violation</span><span class="o">.</span><span class="n">ssl_enabled</span>
+            <span class="k">yield</span> <span class="p">{</span>
+                <span class="s1">&#39;resource_id&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span>
+                <span class="s1">&#39;resource_type&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">resource_type</span><span class="p">,</span>
+                <span class="s1">&#39;rule_index&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">rule_index</span><span class="p">,</span>
+                <span class="s1">&#39;rule_name&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">rule_name</span><span class="p">,</span>
+                <span class="s1">&#39;violation_type&#39;</span><span class="p">:</span> <span class="n">violation</span><span class="o">.</span><span class="n">violation_type</span><span class="p">,</span>
+                <span class="s1">&#39;violation_data&#39;</span><span class="p">:</span> <span class="n">violation_data</span>
+            <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_output_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_violations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Output results.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            all_violations (list): A list of violations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_violations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flatten_violations</span><span class="p">(</span><span class="n">all_violations</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_results_to_db</span><span class="p">(</span><span class="n">all_violations</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_find_violations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cloudsql_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find violations in the policies.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cloudsql_data (list): CloudSQL data to find violations in</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of CloudSQL violations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cloudsql_data</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">cloudsql_data</span><span class="p">)</span>
+
+        <span class="n">all_violations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finding CloudSQL acl violations...&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">cloudsql</span><span class="p">,</span> <span class="n">cloudsql_acl</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cloudsql_data</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> =&gt; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">cloudsql</span><span class="p">,</span> <span class="n">cloudsql_acl</span><span class="p">)</span>
+            <span class="n">violations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules_engine</span><span class="o">.</span><span class="n">find_policy_violations</span><span class="p">(</span>
+                <span class="n">cloudsql_acl</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">violations</span><span class="p">)</span>
+            <span class="n">all_violations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">violations</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">all_violations</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_resource_count</span><span class="p">(</span><span class="n">project_policies</span><span class="p">,</span> <span class="n">cloudsql_acls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get resource count for org and project policies.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_policies (list): project_policies policies from inventory.</span>
+<span class="sd">            cloudsql_acls (list): CloudSql ACLs from inventory.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Resource count map</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resource_counts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">ResourceType</span><span class="o">.</span><span class="n">PROJECT</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">project_policies</span><span class="p">),</span>
+            <span class="n">ResourceType</span><span class="o">.</span><span class="n">CLOUDSQL_ACL</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">cloudsql_acls</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">resource_counts</span>
+
+    <span class="k">def</span> <span class="nf">_get_cloudsql_acls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get CloudSQL acls from data source.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of CloudSql acls.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cloudsql_acls</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cloudsql_acls</span> <span class="o">=</span> <span class="p">(</span><span class="n">cloudsql_dao</span>
+                         <span class="o">.</span><span class="n">CloudsqlDao</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+                         <span class="o">.</span><span class="n">get_cloudsql_acls</span><span class="p">(</span><span class="s1">&#39;cloudsql_instances&#39;</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_timestamp</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">cloudsql_acls</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the data for scanner.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: CloudSQL ACL data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cloudsql_acls_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">project_policies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cloudsql_acls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cloudsql_acls</span><span class="p">()</span>
+        <span class="n">cloudsql_acls_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cloudsql_acls</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+        <span class="n">cloudsql_acls_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">project_policies</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">cloudsql_acls_data</span>
+
+<div class="viewcode-block" id="CloudSqlAclScanner.run"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.scanner.scanners.html#google.cloud.security.scanner.scanners.cloudsql_rules_scanner.CloudSqlAclScanner.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs the data collection.&quot;&quot;&quot;</span>
+        <span class="n">cloudsql_acls_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve</span><span class="p">()</span>
+        <span class="n">all_violations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_violations</span><span class="p">(</span><span class="n">cloudsql_acls_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_results</span><span class="p">(</span><span class="n">all_violations</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

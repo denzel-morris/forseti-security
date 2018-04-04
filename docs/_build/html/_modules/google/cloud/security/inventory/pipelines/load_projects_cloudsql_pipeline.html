@@ -1,0 +1,408 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.inventory.pipelines.load_projects_cloudsql_pipeline &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.inventory.pipelines.load_projects_cloudsql_pipeline</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Pipeline to load project cloudsql data into Inventory.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="kn">import</span> <span class="n">parser</span> <span class="k">as</span> <span class="n">dateutil_parser</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">dao_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">parser</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">inventory_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory.pipelines</span> <span class="kn">import</span> <span class="n">base_pipeline</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LoadProjectsCloudsqlPipeline"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.inventory.pipelines.html#google.cloud.security.inventory.pipelines.load_projects_cloudsql_pipeline.LoadProjectsCloudsqlPipeline">[docs]</a><span class="k">class</span> <span class="nc">LoadProjectsCloudsqlPipeline</span><span class="p">(</span><span class="n">base_pipeline</span><span class="o">.</span><span class="n">BasePipeline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pipeline to load project CloudSql data into Inventory.&quot;&quot;&quot;</span>
+
+    <span class="n">PROJECTS_RESOURCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;project_iam_policies&#39;</span>
+    <span class="n">RESOURCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;cloudsql&#39;</span>
+    <span class="n">RESOURCE_NAME_INSTANCES</span> <span class="o">=</span> <span class="s1">&#39;cloudsql_instances&#39;</span>
+    <span class="n">RESOURCE_NAME_IPADDRESSES</span> <span class="o">=</span> <span class="s1">&#39;cloudsql_ipaddresses&#39;</span>
+    <span class="n">RESOURCE_NAME_AUTHORIZEDNETWORKS</span> <span class="o">=</span> <span class="p">(</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="s1">&#39;cloudsql_ipconfiguration_authorizednetworks&#39;</span><span class="p">)</span>
+
+    <span class="n">MYSQL_DATETIME_FORMAT</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_transform_data</span><span class="p">(</span><span class="n">cloudsql_instances_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield an iterator of loadable instances.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cloudsql_instances_map (iterable): Instances as per-project</span>
+<span class="sd">                dictionary.</span>
+<span class="sd">                Example: {&#39;project_number&#39;: 11111,</span>
+<span class="sd">                          &#39;instances&#39;: instances_dict}</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            iterable: cloudsql, as a per-cloudsql dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">instances_map</span> <span class="ow">in</span> <span class="n">cloudsql_instances_map</span><span class="p">:</span>
+            <span class="n">instances</span> <span class="o">=</span> <span class="n">instances_map</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">instances</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="p">{</span>
+                    <span class="s1">&#39;project_number&#39;</span><span class="p">:</span> <span class="n">instances_map</span><span class="p">[</span><span class="s1">&#39;project_number&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;project&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;project&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;backend_type&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;backendType&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;connection_name&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connectionName&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;current_disk_size&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;currentDiskSize&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                    <span class="s1">&#39;database_version&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;databaseVersion&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;failover_replica_available&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;failoverReplica&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;available&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;failover_replica_name&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;failoverReplica&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;instance_type&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;instanceType&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;ipv6_address&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipv6Address&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;master_instance_name&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;masterInstanceName&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;max_disk_size&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;maxDiskSize&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                    <span class="s1">&#39;on_premises_configuration_host_port&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;onPremisesConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hostPort&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;on_premises_configuration_kind&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;onPremisesConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;region&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;region&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;replica_configuration&#39;</span><span class="p">:</span>\
+                         <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicaConfiguration&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;replica_names&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicaNames&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;self_link&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;selfLink&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;server_ca_cert&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serverCaCert&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;service_account_email_address&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serviceAccountEmailAddress&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_activation_policy&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;activationPolicy&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_authorized_gae_applications&#39;</span><span class="p">:</span>\
+                         <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                        <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;authorizedGaeApplications&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_availability_type&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;availabilityType&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_backup_configuration_binary_log_enabled&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;backupConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                                <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;binaryLogEnabled&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_backup_configuration_enabled&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;backupConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_backup_configuration_kind&#39;</span><span class="p">:</span>\
+                         <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;backupConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_backup_configuration_start_time&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;backupConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;startTime&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_crash_safe_replication_enabled&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crashSafeReplicationEnabled&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_data_disk_size_gb&#39;</span><span class="p">:</span>\
+                        <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dataDiskSizeGb&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_data_disk_type&#39;</span><span class="p">:</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dataDiskType&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_database_flags&#39;</span><span class="p">:</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;databaseFlags&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_database_replication_enabled&#39;</span><span class="p">:</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;databaseReplicationEnabled&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s1">&#39;settings_ip_configuration_ipv4_enabled&#39;</span><span class="p">:</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipv4Enabled&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s1">&#39;settings_ip_configuration_require_ssl&#39;</span><span class="p">:</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;requireSsl&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s1">&#39;settings_kind&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_labels&#39;</span><span class="p">:</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;labels&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_location_preference_follow_gae_application&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;locationPreference&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;followGaeApplication&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_location_preference_kind&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;locationPreference&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_location_preference_zone&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;locationPreference&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;zone&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_maintenance_window&#39;</span><span class="p">:</span>\
+                        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;maintenanceWindow&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_pricing_plan&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pricingPlan&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_replication_type&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicationType&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_settings_version&#39;</span><span class="p">:</span>\
+                        <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settingsVersion&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_storage_auto_resize&#39;</span><span class="p">:</span>\
+                        <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;storageAutoResize&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;settings_storage_auto_resize_limit&#39;</span><span class="p">:</span>\
+                        <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;storageAutoResizeLimit&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                    <span class="s1">&#39;settings_tier&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tier&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;suspension_reason&#39;</span><span class="p">:</span> \
+                        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;suspensionReason&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;raw_cloudsql_instance&#39;</span><span class="p">:</span> <span class="n">parser</span><span class="o">.</span><span class="n">json_stringify</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_transform_authorizednetworks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cloudsql_instances_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield an iterator of loadable authorized networks of cloudsql</span>
+<span class="sd">        instances.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cloudsql_instances_map (iterable): instances as per-project</span>
+<span class="sd">                dictionary.</span>
+<span class="sd">                Example: {&#39;project_number&#39;: 11111,</span>
+<span class="sd">                          &#39;instances&#39;: instances_dict}</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            iterable: authorized network dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">instances_map</span> <span class="ow">in</span> <span class="n">cloudsql_instances_map</span><span class="p">:</span>
+            <span class="n">instances</span> <span class="o">=</span> <span class="n">instances_map</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">instances</span><span class="p">:</span>
+                <span class="n">authorizednetworks</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipConfiguration&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;authorizedNetworks&#39;</span><span class="p">,</span> <span class="p">[{}])</span>
+                <span class="k">for</span> <span class="n">network</span> <span class="ow">in</span> <span class="n">authorizednetworks</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">network</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;expirationTime&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">parsed_time</span> <span class="o">=</span> <span class="n">dateutil_parser</span>\
+                                <span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;expirationTime&#39;</span><span class="p">))</span>
+                            <span class="n">formatted_expirationtime</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">parsed_time</span>\
+                                    <span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MYSQL_DATETIME_FORMAT</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;Unable to parse timeCreated&#39;</span> <span class="o">+</span>\
+                                <span class="s1">&#39;from authorizednetworks: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="n">network</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;expirationTime&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
+                            <span class="n">formatted_expirationtime</span> <span class="o">=</span> <span class="s1">&#39;1972-01-01 00:00:00&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">formatted_expirationtime</span> <span class="o">=</span> <span class="s1">&#39;1972-01-01 00:00:00&#39;</span>
+
+                    <span class="k">yield</span> <span class="p">{</span>
+                        <span class="s1">&#39;project_number&#39;</span><span class="p">:</span> <span class="n">instances_map</span><span class="p">[</span><span class="s1">&#39;project_number&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;instance_name&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="n">network</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">network</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">network</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;expiration_time&#39;</span><span class="p">:</span> <span class="n">formatted_expirationtime</span>
+                    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_transform_ipaddresses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cloudsql_instances_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield an iterator of loadable ipAddresses of cloudsql instances.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cloudsql_instances_map (iterable): Instances as per-project</span>
+<span class="sd">                dictionary.</span>
+<span class="sd">                Example: {&#39;project_number&#39;: 11111,</span>
+<span class="sd">                          &#39;instances&#39;: instances_dict}</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            iterable: ipAddresses dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">instances_map</span> <span class="ow">in</span> <span class="n">cloudsql_instances_map</span><span class="p">:</span>
+            <span class="n">instances</span> <span class="o">=</span> <span class="n">instances_map</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">instances</span><span class="p">:</span>
+                <span class="n">ipaddresses</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipAddresses&#39;</span><span class="p">,</span> <span class="p">[{}])</span>
+                <span class="k">for</span> <span class="n">ipaddress</span> <span class="ow">in</span> <span class="n">ipaddresses</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeToRetire&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">parsed_time</span> <span class="o">=</span> <span class="n">dateutil_parser</span>\
+                                <span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeToRetire&#39;</span><span class="p">))</span>
+                            <span class="n">formatted_timetoretire</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">parsed_time</span>\
+                                    <span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MYSQL_DATETIME_FORMAT</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;Unable to parse timeCreated&#39;</span> <span class="o">+</span>\
+                                <span class="s1">&#39; from ipaddresses: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="n">ipaddress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeToRetire&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
+                            <span class="n">formatted_timetoretire</span> <span class="o">=</span> <span class="s1">&#39;1972-01-01 00:00:00&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">formatted_timetoretire</span> <span class="o">=</span> <span class="s1">&#39;1972-01-01 00:00:00&#39;</span>
+
+                    <span class="k">yield</span> <span class="p">{</span>
+                        <span class="s1">&#39;project_number&#39;</span><span class="p">:</span> <span class="n">instances_map</span><span class="p">[</span><span class="s1">&#39;project_number&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;instance_name&#39;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;ip_address&#39;</span><span class="p">:</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipAddress&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;time_to_retire&#39;</span><span class="p">:</span> <span class="n">formatted_timetoretire</span>
+                    <span class="p">}</span>
+
+    <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cloudsql_instances_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns a dictionary of generators for a different types of resources</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cloudsql_instances_map (iterable): instances as per-project</span>
+<span class="sd">                dictionary.</span>
+<span class="sd">                Example: {&#39;project_number&#39;: 11111,</span>
+<span class="sd">                          &#39;instances&#39;: instances_dict}</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: iterables as a per resource type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_INSTANCES</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transform_data</span><span class="p">(</span><span class="n">cloudsql_instances_map</span><span class="p">)</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_AUTHORIZEDNETWORKS</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transform_authorizednetworks</span><span class="p">(</span><span class="n">cloudsql_instances_map</span><span class="p">)</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_IPADDRESSES</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transform_ipaddresses</span><span class="p">(</span><span class="n">cloudsql_instances_map</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_dict</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the project cloudsql instances from GCP.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Instances as per-project dictionary.</span>
+<span class="sd">                Example: [{project_number: project_number,</span>
+<span class="sd">                          instances: instances_dict}]</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            LoadDataPipelineException: An error with loading data has occurred.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the projects for which we will retrieve the instances.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">project_numbers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dao</span><span class="o">.</span><span class="n">get_project_numbers</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PROJECTS_RESOURCE_NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">dao_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">inventory_errors</span><span class="o">.</span><span class="n">LoadDataPipelineError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="n">instances_maps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">project_number</span> <span class="ow">in</span> <span class="n">project_numbers</span><span class="p">:</span>
+            <span class="n">instances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_api_call</span><span class="p">(</span><span class="s1">&#39;get_instances&#39;</span><span class="p">,</span> <span class="n">project_number</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">instances</span><span class="p">:</span>
+                <span class="n">instances_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;project_number&#39;</span><span class="p">:</span> <span class="n">project_number</span><span class="p">,</span>
+                                 <span class="s1">&#39;instances&#39;</span><span class="p">:</span> <span class="n">instances</span><span class="p">}</span>
+                <span class="n">instances_maps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">instances_map</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instances_maps</span>
+
+    <span class="k">def</span> <span class="nf">_get_loaded_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the count of how many of a instances has been loaded.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dao</span><span class="o">.</span><span class="n">select_record_count</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_INSTANCES</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">dao_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve record count for </span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_INSTANCES</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LoadProjectsCloudsqlPipeline.run"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.inventory.pipelines.html#google.cloud.security.inventory.pipelines.load_projects_cloudsql_pipeline.LoadProjectsCloudsqlPipeline.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs the load Cloudsql data pipeline.&quot;&quot;&quot;</span>
+        <span class="n">instances_maps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve</span><span class="p">()</span>
+        <span class="n">loadable_instances_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">instances_maps</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_INSTANCES</span><span class="p">,</span> \
+                <span class="n">loadable_instances_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_INSTANCES</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_IPADDRESSES</span><span class="p">,</span> \
+                <span class="n">loadable_instances_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_IPADDRESSES</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_AUTHORIZEDNETWORKS</span><span class="p">,</span> \
+                <span class="n">loadable_instances_dict</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME_AUTHORIZEDNETWORKS</span>
+                    <span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_loaded_count</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

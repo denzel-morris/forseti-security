@@ -1,0 +1,1382 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.data_access package &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="google-cloud-security-common-data-access-package">
+<h1>google.cloud.security.common.data_access package<a class="headerlink" href="#google-cloud-security-common-data-access-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html">google.cloud.security.common.data_access.sql_queries package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#module-google.cloud.security.common.data_access.sql_queries.cleanup_tables_sql">google.cloud.security.common.data_access.sql_queries.cleanup_tables_sql module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#module-google.cloud.security.common.data_access.sql_queries.create_tables">google.cloud.security.common.data_access.sql_queries.create_tables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#module-google.cloud.security.common.data_access.sql_queries.load_data">google.cloud.security.common.data_access.sql_queries.load_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#module-google.cloud.security.common.data_access.sql_queries.select_data">google.cloud.security.common.data_access.sql_queries.select_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#module-google.cloud.security.common.data_access.sql_queries.snapshot_cycles_sql">google.cloud.security.common.data_access.sql_queries.snapshot_cycles_sql module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.common.data_access.sql_queries.html#module-google.cloud.security.common.data_access.sql_queries">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.appengine_dao">
+<span id="google-cloud-security-common-data-access-appengine-dao-module"></span><h2>google.cloud.security.common.data_access.appengine_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.appengine_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for AppEngine.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.appengine_dao.AppEngineDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.appengine_dao.</code><code class="descname">AppEngineDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/appengine_dao.html#AppEngineDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.appengine_dao.AppEngineDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>&#8220;Data access object (DAO) for AppEngine.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.appengine_dao.AppEngineDao.get_applications">
+<code class="descname">get_applications</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/appengine_dao.html#AppEngineDao.get_applications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.appengine_dao.AppEngineDao.get_applications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get applications from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of AppEngine applications.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.backend_service_dao">
+<span id="google-cloud-security-common-data-access-backend-service-dao-module"></span><h2>google.cloud.security.common.data_access.backend_service_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.backend_service_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for BackendService.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.backend_service_dao.BackendServiceDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.backend_service_dao.</code><code class="descname">BackendServiceDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/backend_service_dao.html#BackendServiceDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.backend_service_dao.BackendServiceDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>BackendService DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.backend_service_dao.BackendServiceDao.get_backend_services">
+<code class="descname">get_backend_services</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/backend_service_dao.html#BackendServiceDao.get_backend_services"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.backend_service_dao.BackendServiceDao.get_backend_services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get backend services from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of BackendService.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.bigquery_dao">
+<span id="google-cloud-security-common-data-access-bigquery-dao-module"></span><h2>google.cloud.security.common.data_access.bigquery_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.bigquery_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for Big Query.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.bigquery_dao.BigqueryDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.bigquery_dao.</code><code class="descname">BigqueryDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/bigquery_dao.html#BigqueryDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.bigquery_dao.BigqueryDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.project_dao.ProjectDao" title="google.cloud.security.common.data_access.project_dao.ProjectDao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.project_dao.ProjectDao</span></code></a></p>
+<p>Data access object (DAO) for Organizations.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.bigquery_dao.BigqueryDao.get_bigquery_acls">
+<code class="descname">get_bigquery_acls</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/bigquery_dao.html#BigqueryDao.get_bigquery_acls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.bigquery_dao.BigqueryDao.get_bigquery_acls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the Big Query acls from a Big Query acls snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as
+YYYYMMDDTHHMMSSZ.</dd>
+<dt>Returns:</dt>
+<dd>dict: Dictionary keyed by the count of ACLs and then the ACLs.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: An error with MySQL has occurred.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.bucket_dao">
+<span id="google-cloud-security-common-data-access-bucket-dao-module"></span><h2>google.cloud.security.common.data_access.bucket_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.bucket_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for buckets.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.bucket_dao.BucketDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.bucket_dao.</code><code class="descname">BucketDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/bucket_dao.html#BucketDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.bucket_dao.BucketDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.project_dao.ProjectDao" title="google.cloud.security.common.data_access.project_dao.ProjectDao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.project_dao.ProjectDao</span></code></a></p>
+<p>Data access object (DAO) for Organizations.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.bucket_dao.BucketDao.RESOURCE_RAW_BUCKETS">
+<code class="descname">RESOURCE_RAW_BUCKETS</code><em class="property"> = 'raw_buckets'</em><a class="headerlink" href="#google.cloud.security.common.data_access.bucket_dao.BucketDao.RESOURCE_RAW_BUCKETS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.bucket_dao.BucketDao.get_buckets_acls">
+<code class="descname">get_buckets_acls</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/bucket_dao.html#BucketDao.get_buckets_acls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.bucket_dao.BucketDao.get_buckets_acls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the bucket acls from a bucket acls snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as</p>
+<blockquote class="last">
+<div>YYYYMMDDTHHMMSSZ.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>list: List of bucket acls.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: An error with MySQL has occurred.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.bucket_dao.BucketDao.get_buckets_by_project_number">
+<code class="descname">get_buckets_by_project_number</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em>, <em>project_number</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/bucket_dao.html#BucketDao.get_buckets_by_project_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.bucket_dao.BucketDao.get_buckets_by_project_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the buckets for project from a buckets snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as</p>
+<blockquote>
+<div>YYYYMMDDTHHMMSSZ.</div></blockquote>
+<p class="last">project_number (int): Project number</p>
+</dd>
+<dt>Returns:</dt>
+<dd>list: List of project buckets.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: An error with MySQL has occurred.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.bucket_dao.BucketDao.get_raw_buckets">
+<code class="descname">get_raw_buckets</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/bucket_dao.html#BucketDao.get_raw_buckets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.bucket_dao.BucketDao.get_raw_buckets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the bucket and its raw json.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>timestamp (str): The snapshot timestamp, formatted as</dt>
+<dd>YYYYMMDDTHHMMSSZ.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>list: List of dict mapping buckets to their raw json.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.cloudsql_dao">
+<span id="google-cloud-security-common-data-access-cloudsql-dao-module"></span><h2>google.cloud.security.common.data_access.cloudsql_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.cloudsql_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for CloudSQL.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.cloudsql_dao.CloudsqlDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.cloudsql_dao.</code><code class="descname">CloudsqlDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/cloudsql_dao.html#CloudsqlDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.cloudsql_dao.CloudsqlDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.project_dao.ProjectDao" title="google.cloud.security.common.data_access.project_dao.ProjectDao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.project_dao.ProjectDao</span></code></a></p>
+<p>Data access object (DAO) for CloudSQL.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.cloudsql_dao.CloudsqlDao.get_cloudsql_acls">
+<code class="descname">get_cloudsql_acls</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/cloudsql_dao.html#CloudsqlDao.get_cloudsql_acls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.cloudsql_dao.CloudsqlDao.get_cloudsql_acls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the cloudsql acls for project from a snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as</p>
+<blockquote class="last">
+<div>YYYYMMDDTHHMMSSZ.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>list: List of cloudsql acls.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: An error with MySQL has occurred.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.csv_writer">
+<span id="google-cloud-security-common-data-access-csv-writer-module"></span><h2>google.cloud.security.common.data_access.csv_writer module<a class="headerlink" href="#module-google.cloud.security.common.data_access.csv_writer" title="Permalink to this headline">¶</a></h2>
+<p>Writes the csv files for upload to Cloud SQL.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.data_access.csv_writer.write_csv">
+<code class="descclassname">google.cloud.security.common.data_access.csv_writer.</code><code class="descname">write_csv</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/csv_writer.html#write_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.csv_writer.write_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the csv writing flow.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+data (iterable): An iterable of data to be written to csv.
+write_header (bool): If True, write the header in the csv file.</dd>
+<dt>Yields:</dt>
+<dd>object: The CSV temporary file pointer.</dd>
+<dt>Raises:</dt>
+<dd>CSVFileError: If there was an error writing the CSV file.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.dao">
+<span id="google-cloud-security-common-data-access-dao-module"></span><h2>google.cloud.security.common.data_access.dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO).</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.dao.Dao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.dao.</code><code class="descname">Dao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access._db_connector.DbConnector</span></code></p>
+<p>Data access object (DAO).</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.create_snapshot_table">
+<code class="descname">create_snapshot_table</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.create_snapshot_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.create_snapshot_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as</p>
+<blockquote class="last">
+<div>YYYYMMDDTHHMMSSZ.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>str: String of the created snapshot table.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.execute_sql_with_commit">
+<code class="descname">execute_sql_with_commit</code><span class="sig-paren">(</span><em>resource_name</em>, <em>sql</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.execute_sql_with_commit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.execute_sql_with_commit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a provided sql statement with commit.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): String of the resource name.
+sql (str): String of the sql statement.
+values (tuple): Tuple of string for sql placeholder values.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: When an error has occured while executing the query.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.execute_sql_with_fetch">
+<code class="descname">execute_sql_with_fetch</code><span class="sig-paren">(</span><em>resource_name</em>, <em>sql</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.execute_sql_with_fetch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.execute_sql_with_fetch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a provided sql statement with fetch.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): String of the resource name.
+sql (str): String of the sql statement.
+values (tuple): Tuple of string for sql placeholder values.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of dict representing rows of sql query result.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: When an error has occured while executing the query.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.get_latest_snapshot_timestamp">
+<code class="descname">get_latest_snapshot_timestamp</code><span class="sig-paren">(</span><em>statuses</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.get_latest_snapshot_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.get_latest_snapshot_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the latest timestamp of the completed snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>statuses (tuple): The tuple of snapshot statuses to filter on.</dd>
+<dt>Returns:</dt>
+<dd>str: The string timestamp of the latest complete snapshot.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: When no rows are found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data into a snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as</p>
+<blockquote>
+<div>YYYYMMDDTHHMMSSZ.</div></blockquote>
+<p class="last">data (iterable): An iterable or a list of data to be uploaded.</p>
+</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: When an error has occured while executing the query.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="google.cloud.security.common.data_access.dao.Dao.map_row_to_object">
+<em class="property">static </em><code class="descname">map_row_to_object</code><span class="sig-paren">(</span><em>object_class</em>, <em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.map_row_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.map_row_to_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiate an object from database row.</p>
+<p>TODO: Make this go away when we start using an ORM.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>object_class (object): The object class to create.
+row (row): The database row to map.</dd>
+<dt>Returns:</dt>
+<dd>obj_class: A new &#8220;obj_class&#8221;, created from the row.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.select_group_ids">
+<code class="descname">select_group_ids</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.select_group_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.select_group_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the group ids from a snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">resource_name (str): String of the resource name.
+timestamp (str): String of timestamp, formatted as</p>
+<blockquote class="last">
+<div>YYYYMMDDTHHMMSSZ.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>list: A list of group ids.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: When an error has occured while executing the query.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.dao.Dao.select_record_count">
+<code class="descname">select_record_count</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/dao.html#Dao.select_record_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.dao.Dao.select_record_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the record count from a snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>resource_name (str): String of the resource name, which is</dt>
+<dd>embedded in the table name.</dd>
+<dt>timestamp (str): String of timestamp, formatted as</dt>
+<dd>YYYYMMDDTHHMMSSZ.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>int: Integer of the record count in a snapshot table.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: When an error has occured while executing the query.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.errors">
+<span id="google-cloud-security-common-data-access-errors-module"></span><h2>google.cloud.security.common.data_access.errors module<a class="headerlink" href="#module-google.cloud.security.common.data_access.errors" title="Permalink to this headline">¶</a></h2>
+<p>Errors related to data access.</p>
+<dl class="exception">
+<dt id="google.cloud.security.common.data_access.errors.CSVFileError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.data_access.errors.</code><code class="descname">CSVFileError</code><span class="sig-paren">(</span><em>resource_name</em>, <em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/errors.html#CSVFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.errors.CSVFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Error for csv file.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.errors.CSVFileError.CUSTOM_ERROR_MESSAGE">
+<code class="descname">CUSTOM_ERROR_MESSAGE</code><em class="property"> = 'Unable to create csv file for {0}:\n{1}'</em><a class="headerlink" href="#google.cloud.security.common.data_access.errors.CSVFileError.CUSTOM_ERROR_MESSAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.data_access.errors.Error">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.data_access.errors.</code><code class="descname">Error</code><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/errors.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.errors.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base class for errors.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.data_access.errors.MySQLError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.data_access.errors.</code><code class="descname">MySQLError</code><span class="sig-paren">(</span><em>resource_name</em>, <em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/errors.html#MySQLError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.errors.MySQLError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.errors.Error" title="google.cloud.security.common.data_access.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.errors.Error</span></code></a></p>
+<p>Error for mysql exceptions.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.errors.MySQLError.CUSTOM_ERROR_MESSAGE">
+<code class="descname">CUSTOM_ERROR_MESSAGE</code><em class="property"> = 'Error with MySQL for {0}:\n{1}'</em><a class="headerlink" href="#google.cloud.security.common.data_access.errors.MySQLError.CUSTOM_ERROR_MESSAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.data_access.errors.NoResultsError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.data_access.errors.</code><code class="descname">NoResultsError</code><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/errors.html#NoResultsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.errors.NoResultsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.errors.Error" title="google.cloud.security.common.data_access.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.errors.Error</span></code></a></p>
+<p>Error for no results found.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.firewall_rule_dao">
+<span id="google-cloud-security-common-data-access-firewall-rule-dao-module"></span><h2>google.cloud.security.common.data_access.firewall_rule_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.firewall_rule_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for FirewallRule.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.firewall_rule_dao.FirewallRuleDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.firewall_rule_dao.</code><code class="descname">FirewallRuleDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/firewall_rule_dao.html#FirewallRuleDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.firewall_rule_dao.FirewallRuleDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Firewall rule DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.firewall_rule_dao.FirewallRuleDao.get_firewall_rules">
+<code class="descname">get_firewall_rules</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/firewall_rule_dao.html#FirewallRuleDao.get_firewall_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.firewall_rule_dao.FirewallRuleDao.get_firewall_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get firewall rules from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (int): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: FirewallRule</dd>
+<dt>Raises:</dt>
+<dd>MySQLError if a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.folder_dao">
+<span id="google-cloud-security-common-data-access-folder-dao-module"></span><h2>google.cloud.security.common.data_access.folder_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.folder_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for Folders.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.folder_dao.FolderDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.folder_dao.</code><code class="descname">FolderDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/folder_dao.html#FolderDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.folder_dao.FolderDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Data access object (DAO) for Folders.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.folder_dao.FolderDao.get_folder">
+<code class="descname">get_folder</code><span class="sig-paren">(</span><em>folder_id</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/folder_dao.html#FolderDao.get_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.folder_dao.FolderDao.get_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an folder from the database snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>folder_id (str): The id of the folder to retrieve.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>Folder: A Folder from the database snapshot.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.folder_dao.FolderDao.get_folder_iam_policies">
+<code class="descname">get_folder_iam_policies</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/folder_dao.html#FolderDao.get_folder_iam_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.folder_dao.FolderDao.get_folder_iam_policies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the folder policies.</p>
+<p>This does not raise any errors if there&#8217;s a database or json parse
+error because we want to return as many folders as possible.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>dict: A dict keyed by the folders
+(gcp_type.folder.Folder) and their iam policies (dict).</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.folder_dao.FolderDao.get_folders">
+<code class="descname">get_folders</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/folder_dao.html#FolderDao.get_folders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.folder_dao.FolderDao.get_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get folders from snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Folders.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="google.cloud.security.common.data_access.folder_dao.FolderDao.map_row_to_object">
+<em class="property">static </em><code class="descname">map_row_to_object</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/folder_dao.html#FolderDao.map_row_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.folder_dao.FolderDao.map_row_to_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiate a Folder from a database row.</p>
+<p>TODO: Make this go away when we start using an ORM.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>row (dict): The database row to map to the Folder object.</dd>
+<dt>Returns:</dt>
+<dd>Folder: A Folder from the database row.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.forseti">
+<span id="google-cloud-security-common-data-access-forseti-module"></span><h2>google.cloud.security.common.data_access.forseti module<a class="headerlink" href="#module-google.cloud.security.common.data_access.forseti" title="Permalink to this headline">¶</a></h2>
+<p>Forseti Database Objects.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.forseti.Importer">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.forseti.</code><code class="descname">Importer</code><span class="sig-paren">(</span><em>db_connect_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forseti.html#Importer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Importer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Forseti data importer to iterate the inventory and policies.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Importer.SUPPORTED_SCHEMAS">
+<code class="descname">SUPPORTED_SCHEMAS</code><em class="property"> = ['1.0', '2.0']</em><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Importer.SUPPORTED_SCHEMAS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.forseti.</code><code class="descname">Snapshot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forseti.html#Snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p>Represents a Forseti snapshot row.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot.complete_time">
+<code class="descname">complete_time</code><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot.complete_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot.cycle_timestamp">
+<code class="descname">cycle_timestamp</code><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot.cycle_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot.id">
+<code class="descname">id</code><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot.schema_version">
+<code class="descname">schema_version</code><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot.schema_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot.start_time">
+<code class="descname">start_time</code><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot.start_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.Snapshot.status">
+<code class="descname">status</code><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.Snapshot.status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.forseti.SnapshotState">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.forseti.</code><code class="descname">SnapshotState</code><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forseti.html#SnapshotState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.SnapshotState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Possible states for Forseti snapshots.</p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.SnapshotState.FAILURE">
+<code class="descname">FAILURE</code><em class="property"> = 'FAILURE'</em><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.SnapshotState.FAILURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.SnapshotState.PARTIAL_SUCCESS">
+<code class="descname">PARTIAL_SUCCESS</code><em class="property"> = 'PARTIAL_SUCCESS'</em><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.SnapshotState.PARTIAL_SUCCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.SnapshotState.RUNNING">
+<code class="descname">RUNNING</code><em class="property"> = 'RUNNING'</em><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.SnapshotState.RUNNING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.SnapshotState.SUCCESS">
+<code class="descname">SUCCESS</code><em class="property"> = 'SUCCESS'</em><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.SnapshotState.SUCCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.forseti.SnapshotState.TIMEOUT">
+<code class="descname">TIMEOUT</code><em class="property"> = 'TIMEOUT'</em><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.SnapshotState.TIMEOUT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.data_access.forseti.create_table_names">
+<code class="descclassname">google.cloud.security.common.data_access.forseti.</code><code class="descname">create_table_names</code><span class="sig-paren">(</span><em>timestamp</em>, <em>schema_version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forseti.html#create_table_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forseti.create_table_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forseti tables are namespaced via snapshot timestamp.
+This function generates the appropriate classes to
+abstract the access to a single snapshot.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.forseti_system_dao">
+<span id="google-cloud-security-common-data-access-forseti-system-dao-module"></span><h2>google.cloud.security.common.data_access.forseti_system_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.forseti_system_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for Forseti system management.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.forseti_system_dao.ForsetiSystemDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.forseti_system_dao.</code><code class="descname">ForsetiSystemDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forseti_system_dao.html#ForsetiSystemDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forseti_system_dao.ForsetiSystemDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Data access object (DAO) for Forseti system management.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>global_configs (dict): Global config - used to lookup db_name</dd>
+</dl>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.forseti_system_dao.ForsetiSystemDao.cleanup_inventory_tables">
+<code class="descname">cleanup_inventory_tables</code><span class="sig-paren">(</span><em>retention_days</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forseti_system_dao.html#ForsetiSystemDao.cleanup_inventory_tables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forseti_system_dao.ForsetiSystemDao.cleanup_inventory_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up old inventory tables based on their age</p>
+<p>Will detect tables based on snapshot start time in snapshot table,
+and drop tables older than retention_days specified.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>retention_days (int): Days of inventory tables to retain.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.forwarding_rules_dao">
+<span id="google-cloud-security-common-data-access-forwarding-rules-dao-module"></span><h2>google.cloud.security.common.data_access.forwarding_rules_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.forwarding_rules_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for ForwardingRules.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.forwarding_rules_dao.ForwardingRulesDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.forwarding_rules_dao.</code><code class="descname">ForwardingRulesDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forwarding_rules_dao.html#ForwardingRulesDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forwarding_rules_dao.ForwardingRulesDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>ForwardingRules DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.forwarding_rules_dao.ForwardingRulesDao.get_forwarding_rules">
+<code class="descname">get_forwarding_rules</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/forwarding_rules_dao.html#ForwardingRulesDao.get_forwarding_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.forwarding_rules_dao.ForwardingRulesDao.get_forwarding_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get forwarding rules from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of ForwardingRules.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError if a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.group_dao">
+<span id="google-cloud-security-common-data-access-group-dao-module"></span><h2>google.cloud.security.common.data_access.group_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.group_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for Groups.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.group_dao.GroupDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.group_dao.</code><code class="descname">GroupDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/group_dao.html#GroupDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.group_dao.GroupDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Data access object (DAO) for Groups.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.group_dao.GroupDao.get_all_groups">
+<code class="descname">get_all_groups</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/group_dao.html#GroupDao.get_all_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.group_dao.GroupDao.get_all_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the groups.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>tuple: A tuple with group data as dict.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.group_dao.GroupDao.get_group_id">
+<code class="descname">get_group_id</code><span class="sig-paren">(</span><em>resource_name</em>, <em>group_email</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/group_dao.html#GroupDao.get_group_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.group_dao.GroupDao.get_group_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the group_id for the specified group_email.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+group_email (str): The group email.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>str: String of the group id.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.group_dao.GroupDao.get_group_members">
+<code class="descname">get_group_members</code><span class="sig-paren">(</span><em>resource_name</em>, <em>group_id</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/group_dao.html#GroupDao.get_group_members"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.group_dao.GroupDao.get_group_members" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the members of a group.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+group_id (str): The group id.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">tuple: A tuple of group members in dict format.</p>
+<dl class="last docutils">
+<dt>({&#8216;group_id&#8217;: &#8216;00lnxb&#8217;,</dt>
+<dd>&#8216;member_email&#8217;: <a class="reference external" href="mailto:'foo&#37;&#52;&#48;company&#46;com">'foo<span>&#64;</span>company<span>&#46;</span>com</a>&#8216;,
+&#8216;member_id&#8217;: &#8216;11111&#8217;,
+&#8216;member_role&#8217;: &#8216;OWNER&#8217;,
+&#8216;member_type&#8217;: &#8216;USER&#8217;}, ...)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.group_dao.GroupDao.get_recursive_members_of_group">
+<code class="descname">get_recursive_members_of_group</code><span class="sig-paren">(</span><em>group_email</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/group_dao.html#GroupDao.get_recursive_members_of_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.group_dao.GroupDao.get_recursive_members_of_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the recursive members of a group.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>group_email (str): The group email.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">list: A list of group members in dict format.</p>
+<dl class="last docutils">
+<dt>[{&#8216;group_id&#8217;: &#8216;00lnxb&#8217;,</dt>
+<dd>&#8216;member_email&#8217;: <a class="reference external" href="mailto:'foo&#37;&#52;&#48;company&#46;com">'foo<span>&#64;</span>company<span>&#46;</span>com</a>&#8216;,
+&#8216;member_id&#8217;: &#8216;11111&#8217;,
+&#8216;member_role&#8217;: &#8216;OWNER&#8217;,
+&#8216;member_type&#8217;: &#8216;USER&#8217;}, ...]</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.instance_dao">
+<span id="google-cloud-security-common-data-access-instance-dao-module"></span><h2>google.cloud.security.common.data_access.instance_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.instance_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for Instance.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.instance_dao.InstanceDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.instance_dao.</code><code class="descname">InstanceDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_dao.html#InstanceDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_dao.InstanceDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Instance DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.instance_dao.InstanceDao.get_instances">
+<code class="descname">get_instances</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_dao.html#InstanceDao.get_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_dao.InstanceDao.get_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get instances from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Instance.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: If a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.instance_group_dao">
+<span id="google-cloud-security-common-data-access-instance-group-dao-module"></span><h2>google.cloud.security.common.data_access.instance_group_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.instance_group_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for InstanceGroup.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.instance_group_dao.InstanceGroupDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.instance_group_dao.</code><code class="descname">InstanceGroupDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_group_dao.html#InstanceGroupDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_group_dao.InstanceGroupDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>InstanceGroup DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.instance_group_dao.InstanceGroupDao.get_instance_groups">
+<code class="descname">get_instance_groups</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_group_dao.html#InstanceGroupDao.get_instance_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_group_dao.InstanceGroupDao.get_instance_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get instance groups from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of InstanceGroup.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: If a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.instance_group_manager_dao">
+<span id="google-cloud-security-common-data-access-instance-group-manager-dao-module"></span><h2>google.cloud.security.common.data_access.instance_group_manager_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.instance_group_manager_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for Instance Group Manager.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.instance_group_manager_dao.InstanceGroupManagerDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.instance_group_manager_dao.</code><code class="descname">InstanceGroupManagerDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_group_manager_dao.html#InstanceGroupManagerDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_group_manager_dao.InstanceGroupManagerDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>InstanceGroupManager DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.instance_group_manager_dao.InstanceGroupManagerDao.get_instance_group_managers">
+<code class="descname">get_instance_group_managers</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_group_manager_dao.html#InstanceGroupManagerDao.get_instance_group_managers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_group_manager_dao.InstanceGroupManagerDao.get_instance_group_managers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get instance group managers from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of InstanceGroupManager.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: If a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.instance_template_dao">
+<span id="google-cloud-security-common-data-access-instance-template-dao-module"></span><h2>google.cloud.security.common.data_access.instance_template_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.instance_template_dao" title="Permalink to this headline">¶</a></h2>
+<p>Data access object for InstanceTemplate.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.instance_template_dao.InstanceTemplateDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.instance_template_dao.</code><code class="descname">InstanceTemplateDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_template_dao.html#InstanceTemplateDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_template_dao.InstanceTemplateDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>InstanceTemplate DAO.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.instance_template_dao.InstanceTemplateDao.get_instance_templates">
+<code class="descname">get_instance_templates</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/instance_template_dao.html#InstanceTemplateDao.get_instance_templates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.instance_template_dao.InstanceTemplateDao.get_instance_templates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get instance templates from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of InstanceTemplate.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: If a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.ke_dao">
+<span id="google-cloud-security-common-data-access-ke-dao-module"></span><h2>google.cloud.security.common.data_access.ke_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.ke_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for KE.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.ke_dao.KeDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.ke_dao.</code><code class="descname">KeDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/ke_dao.html#KeDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.ke_dao.KeDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>&#8220;Data access object (DAO) for Kubernetes Engine.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.ke_dao.KeDao.get_clusters">
+<code class="descname">get_clusters</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/ke_dao.html#KeDao.get_clusters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.ke_dao.KeDao.get_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get KE clusters from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of KeCluster objects.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError if a MySQL error occurs.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.load_data_sql_provider">
+<span id="google-cloud-security-common-data-access-load-data-sql-provider-module"></span><h2>google.cloud.security.common.data_access.load_data_sql_provider module<a class="headerlink" href="#module-google.cloud.security.common.data_access.load_data_sql_provider" title="Permalink to this headline">¶</a></h2>
+<p>Provides the load data sql for resources.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.data_access.load_data_sql_provider.provide_load_data_sql">
+<code class="descclassname">google.cloud.security.common.data_access.load_data_sql_provider.</code><code class="descname">provide_load_data_sql</code><span class="sig-paren">(</span><em>resource_name</em>, <em>csv_filename</em>, <em>snapshot_table_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/load_data_sql_provider.html#provide_load_data_sql"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.load_data_sql_provider.provide_load_data_sql" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide the load data sql for projects.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+csv_filename (str): The csv filename; full path included.
+snapshot_table_name (str): The snapshot table name.</dd>
+<dt>Returns:</dt>
+<dd>str: The load data sql statement for projects.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.org_resource_rel_dao">
+<span id="google-cloud-security-common-data-access-org-resource-rel-dao-module"></span><h2>google.cloud.security.common.data_access.org_resource_rel_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.org_resource_rel_dao" title="Permalink to this headline">¶</a></h2>
+<p>DAO for organization resource entity relationships.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.org_resource_rel_dao.OrgResourceRelDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.org_resource_rel_dao.</code><code class="descname">OrgResourceRelDao</code><span class="sig-paren">(</span><em>global_configs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/org_resource_rel_dao.html#OrgResourceRelDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.org_resource_rel_dao.OrgResourceRelDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>DAO for organization resource entity relationships.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.org_resource_rel_dao.OrgResourceRelDao.find_ancestors">
+<code class="descname">find_ancestors</code><span class="sig-paren">(</span><em>org_resource</em>, <em>snapshot_timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/org_resource_rel_dao.html#OrgResourceRelDao.find_ancestors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.org_resource_rel_dao.OrgResourceRelDao.find_ancestors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find ancestors of a particular resource.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>org_resource (Resource): A Resource.
+snapshot_timestamp (str): The timestamp to use for data lookup.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>list: A list of Resource ancestors, starting with the</dt>
+<dd>closest (lowest-level) ancestor.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.organization_dao">
+<span id="google-cloud-security-common-data-access-organization-dao-module"></span><h2>google.cloud.security.common.data_access.organization_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.organization_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for Organizations.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.organization_dao.OrganizationDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.organization_dao.</code><code class="descname">OrganizationDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/organization_dao.html#OrganizationDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.organization_dao.OrganizationDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Data access object (DAO) for Organizations.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.organization_dao.OrganizationDao.get_org_iam_policies">
+<code class="descname">get_org_iam_policies</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/organization_dao.html#OrganizationDao.get_org_iam_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.organization_dao.OrganizationDao.get_org_iam_policies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the organization policies.</p>
+<p>This does not raise any errors if there&#8217;s a database or json parse
+error because we want to return as many organizations as possible.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: A dict that maps organizations</dt>
+<dd>(gcp_type.organization.Organization) to their
+IAM policies (dict).</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.organization_dao.OrganizationDao.get_organization">
+<code class="descname">get_organization</code><span class="sig-paren">(</span><em>org_id</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/organization_dao.html#OrganizationDao.get_organization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.organization_dao.OrganizationDao.get_organization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an organization from the database snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>org_id (int): The Organization to retrieve.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>Organization: An Organization from the database snapshot.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: If there was an error getting the organization.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.organization_dao.OrganizationDao.get_organizations">
+<code class="descname">get_organizations</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/organization_dao.html#OrganizationDao.get_organizations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.organization_dao.OrganizationDao.get_organizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get organizations from snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Organizations.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.project_dao">
+<span id="google-cloud-security-common-data-access-project-dao-module"></span><h2>google.cloud.security.common.data_access.project_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.project_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO).</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.project_dao.</code><code class="descname">ProjectDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Data access object (DAO).</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.get_project">
+<code class="descname">get_project</code><span class="sig-paren">(</span><em>project_id</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.get_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.get_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a project from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_id (str): The id of the project.
+timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>Project: A Project, if found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_by_number">
+<code class="descname">get_project_by_number</code><span class="sig-paren">(</span><em>project_number</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.get_project_by_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_by_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a project from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>project_number (int): The number of the project.
+timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>Project: A Project, if found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_numbers">
+<code class="descname">get_project_numbers</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.get_project_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the project numbers from a projects snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+timestamp (str): The timestamp, formatted as YYYYMMDDTHHMMSSZ.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of project numbers.</dd>
+<dt>Raises:</dt>
+<dd>MySQLError: An error with MySQL has occurred.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_policies">
+<code class="descname">get_project_policies</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.get_project_policies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_policies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the project policies.</p>
+<p>This does not raise any errors on database or json parse errors
+because we want to return as many projects as possible.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource type.
+timestamp (str): The timestamp of the snapshot.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: A dict containing the projects (gcp_type.project.Project)</dt>
+<dd>and their iam policies (dict).</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_raw_data">
+<code class="descname">get_project_raw_data</code><span class="sig-paren">(</span><em>resource_name</em>, <em>timestamp</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.get_project_raw_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.get_project_raw_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the project raw data from a projects snapshot table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>resource_name (str): The resource name.
+timestamp (str): Snapshot timestamp, formatted as YYYYMMDDTHHMMSSZ.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs (dict): Additional args.</dd>
+<dt>Returns:</dt>
+<dd>list: List of project raw data.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.get_projects">
+<code class="descname">get_projects</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.get_projects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.get_projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get projects from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Projects.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="google.cloud.security.common.data_access.project_dao.ProjectDao.map_row_to_object">
+<em class="property">static </em><code class="descname">map_row_to_object</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/project_dao.html#ProjectDao.map_row_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.project_dao.ProjectDao.map_row_to_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiate a Project from database row.</p>
+<p>TODO: Make this go away when we start using an ORM.
+ProjectDao has a special case because the database schema doesn&#8217;t
+match the GCP API fields.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>row (dict): The database row to map.</dd>
+<dt>Returns:</dt>
+<dd>Project: A Project, created from the row.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.service_account_dao">
+<span id="google-cloud-security-common-data-access-service-account-dao-module"></span><h2>google.cloud.security.common.data_access.service_account_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.service_account_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for AppEngine.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.service_account_dao.ServiceAccountDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.service_account_dao.</code><code class="descname">ServiceAccountDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/service_account_dao.html#ServiceAccountDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.service_account_dao.ServiceAccountDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>&#8220;Data access object (DAO) for Service Accounts.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.service_account_dao.ServiceAccountDao.get_service_accounts">
+<code class="descname">get_service_accounts</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/service_account_dao.html#ServiceAccountDao.get_service_accounts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.service_account_dao.ServiceAccountDao.get_service_accounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Service Accounts from a particular snapshot.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The snapshot timestamp.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of Service Accounts.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.violation_dao">
+<span id="google-cloud-security-common-data-access-violation-dao-module"></span><h2>google.cloud.security.common.data_access.violation_dao module<a class="headerlink" href="#module-google.cloud.security.common.data_access.violation_dao" title="Permalink to this headline">¶</a></h2>
+<p>Provides the data access object (DAO) for Organizations.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.data_access.violation_dao.</code><code class="descname">ViolationDao</code><span class="sig-paren">(</span><em>global_configs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/violation_dao.html#ViolationDao"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.data_access.dao.Dao" title="google.cloud.security.common.data_access.dao.Dao"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.data_access.dao.Dao</span></code></a></p>
+<p>Data access object (DAO) for rule violations.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation">
+<em class="property">class </em><code class="descname">Violation</code><span class="sig-paren">(</span><em>violation_hash</em>, <em>resource_id</em>, <em>created_at_datetime</em>, <em>rule_name</em>, <em>rule_index</em>, <em>violation_type</em>, <em>violation_data</em>, <em>resource_type</em><span class="sig-paren">)</span><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.created_at_datetime">
+<code class="descname">created_at_datetime</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.created_at_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.resource_id">
+<code class="descname">resource_id</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.resource_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.resource_type">
+<code class="descname">resource_type</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.resource_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.rule_index">
+<code class="descname">rule_index</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.rule_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.rule_name">
+<code class="descname">rule_name</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.rule_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.violation_data">
+<code class="descname">violation_data</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.violation_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.violation_hash">
+<code class="descname">violation_hash</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.violation_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.violation_type">
+<code class="descname">violation_type</code><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.Violation.violation_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.frozen_violation_attribute_list">
+<code class="descclassname">ViolationDao.</code><code class="descname">frozen_violation_attribute_list</code><em class="property"> = frozenset(['violation_hash', 'resource_id', 'created_at_datetime', 'rule_name', 'rule_index', 'violation_type', 'violation_data', 'resource_type'])</em><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.frozen_violation_attribute_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.get_all_violations">
+<code class="descclassname">ViolationDao.</code><code class="descname">get_all_violations</code><span class="sig-paren">(</span><em>timestamp</em>, <em>violation_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/violation_dao.html#ViolationDao.get_all_violations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.get_all_violations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the violations.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp (str): The timestamp of the snapshot.
+violation_type (str): The violation type.</dd>
+<dt>Returns:</dt>
+<dd>list: A list of dict of the violations data.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.insert_violations">
+<code class="descclassname">ViolationDao.</code><code class="descname">insert_violations</code><span class="sig-paren">(</span><em>violations</em>, <em>snapshot_timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/violation_dao.html#ViolationDao.insert_violations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.insert_violations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import violations into database.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">violations (iterator): An iterator of RuleViolations.
+snapshot_timestamp (str): The snapshot timestamp to associate</p>
+<blockquote class="last">
+<div>these violations with.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>tuple: A tuple of (int, list) containing the count of inserted</dt>
+<dd>rows and a list of violations that encountered an error during
+insert.</dd>
+</dl>
+</dd>
+<dt>Raise:</dt>
+<dd>MySQLError: is raised when the snapshot table can not be created.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="google.cloud.security.common.data_access.violation_dao.ViolationDao.violation_attribute_list">
+<code class="descclassname">ViolationDao.</code><code class="descname">violation_attribute_list</code><em class="property"> = ['violation_hash', 'resource_type', 'resource_id', 'rule_name', 'rule_index', 'violation_type', 'violation_data', 'created_at_datetime']</em><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.ViolationDao.violation_attribute_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.data_access.violation_dao.map_by_resource">
+<code class="descclassname">google.cloud.security.common.data_access.violation_dao.</code><code class="descname">map_by_resource</code><span class="sig-paren">(</span><em>violation_rows</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/violation_dao.html#map_by_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.violation_dao.map_by_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a map of violation types to violations of that resource.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>violation_rows (list): A list of dict of violation data.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>dict: A dict of violation types mapped to the list of corresponding</dt>
+<dd>violation types, i.e. { resource =&gt; [violation_data...] }.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.violation_format">
+<span id="google-cloud-security-common-data-access-violation-format-module"></span><h2>google.cloud.security.common.data_access.violation_format module<a class="headerlink" href="#module-google.cloud.security.common.data_access.violation_format" title="Permalink to this headline">¶</a></h2>
+<p>Provides formatting functions for violations</p>
+<dl class="function">
+<dt id="google.cloud.security.common.data_access.violation_format.format_groups_violation">
+<code class="descclassname">google.cloud.security.common.data_access.violation_format.</code><code class="descname">format_groups_violation</code><span class="sig-paren">(</span><em>violation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/violation_format.html#format_groups_violation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.violation_format.format_groups_violation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the groups violation data into a tuple.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>violation (namedtuple): The groups violation. This is a named tuple</dt>
+<dd>(see rules.py in google.cloud.security.scanner.audit).</dd>
+</dl>
+</dd>
+<dt>Yields:</dt>
+<dd>tuple: A tuple of the violation properties.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.data_access.violation_format.format_violation">
+<code class="descclassname">google.cloud.security.common.data_access.violation_format.</code><code class="descname">format_violation</code><span class="sig-paren">(</span><em>violation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/data_access/violation_format.html#format_violation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.data_access.violation_format.format_violation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the policy violation data into a tuple.</p>
+<p>Also flattens the RuleViolation, since it consists of the resource,
+rule, and members that don&#8217;t meet the rule criteria.</p>
+<p>Various properties of RuleViolation may also have values that exceed the
+declared column length, so truncate as necessary to prevent MySQL errors.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>violation (namedtuple): The Policy RuleViolation. This is a named</dt>
+<dd>tuple (see the ViolationDao class in violation_dao.py).</dd>
+</dl>
+</dd>
+<dt>Yields:</dt>
+<dd>tuple: A tuple of the rule violation properties.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access.violation_map">
+<span id="google-cloud-security-common-data-access-violation-map-module"></span><h2>google.cloud.security.common.data_access.violation_map module<a class="headerlink" href="#module-google.cloud.security.common.data_access.violation_map" title="Permalink to this headline">¶</a></h2>
+<p>Provides violations map</p>
+</div>
+<div class="section" id="module-google.cloud.security.common.data_access">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-google.cloud.security.common.data_access" title="Permalink to this headline">¶</a></h2>
+<p>APIs and utilities for data access.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">google.cloud.security.common.data_access package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.appengine_dao">google.cloud.security.common.data_access.appengine_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.backend_service_dao">google.cloud.security.common.data_access.backend_service_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.bigquery_dao">google.cloud.security.common.data_access.bigquery_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.bucket_dao">google.cloud.security.common.data_access.bucket_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.cloudsql_dao">google.cloud.security.common.data_access.cloudsql_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.csv_writer">google.cloud.security.common.data_access.csv_writer module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.dao">google.cloud.security.common.data_access.dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.errors">google.cloud.security.common.data_access.errors module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.firewall_rule_dao">google.cloud.security.common.data_access.firewall_rule_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.folder_dao">google.cloud.security.common.data_access.folder_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.forseti">google.cloud.security.common.data_access.forseti module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.forseti_system_dao">google.cloud.security.common.data_access.forseti_system_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.forwarding_rules_dao">google.cloud.security.common.data_access.forwarding_rules_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.group_dao">google.cloud.security.common.data_access.group_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.instance_dao">google.cloud.security.common.data_access.instance_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.instance_group_dao">google.cloud.security.common.data_access.instance_group_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.instance_group_manager_dao">google.cloud.security.common.data_access.instance_group_manager_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.instance_template_dao">google.cloud.security.common.data_access.instance_template_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.ke_dao">google.cloud.security.common.data_access.ke_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.load_data_sql_provider">google.cloud.security.common.data_access.load_data_sql_provider module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.org_resource_rel_dao">google.cloud.security.common.data_access.org_resource_rel_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.organization_dao">google.cloud.security.common.data_access.organization_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.project_dao">google.cloud.security.common.data_access.project_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.service_account_dao">google.cloud.security.common.data_access.service_account_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.violation_dao">google.cloud.security.common.data_access.violation_dao module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.violation_format">google.cloud.security.common.data_access.violation_format module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access.violation_map">google.cloud.security.common.data_access.violation_map module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.data_access">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/google.cloud.security.common.data_access.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/source/google.cloud.security.common.data_access.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

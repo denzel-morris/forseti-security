@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.inventory.pipelines.load_projects_buckets_acls_pipeline &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.inventory.pipelines.load_projects_buckets_acls_pipeline</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Pipeline to load bucket acls into Inventory.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">dao_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">inventory_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory.pipelines</span> <span class="kn">import</span> <span class="n">base_pipeline</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LoadProjectsBucketsAclsPipeline"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.inventory.pipelines.html#google.cloud.security.inventory.pipelines.load_projects_buckets_acls_pipeline.LoadProjectsBucketsAclsPipeline">[docs]</a><span class="k">class</span> <span class="nc">LoadProjectsBucketsAclsPipeline</span><span class="p">(</span><span class="n">base_pipeline</span><span class="o">.</span><span class="n">BasePipeline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pipeline to load project buckets data into Inventory.&quot;&quot;&quot;</span>
+
+    <span class="n">PROJECTS_RESOURCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;project_iam_policies&#39;</span>
+    <span class="n">RESOURCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;buckets_acl&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_from_api</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield an iterator of loadable bucket acls.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_from_api (iterable): Bucket acls as per-bucket</span>
+<span class="sd">                dictionary.</span>
+<span class="sd">                Example: {&#39;bucket_name&#39;: &#39;example_bucket_name.appspot.com&#39;,</span>
+<span class="sd">                          &#39;acl&#39;: bucket_acls_json}</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            iterable: bucket acls, as a per-bucket dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">buckets_acls_map</span> <span class="ow">in</span> <span class="n">resource_from_api</span><span class="p">:</span>
+            <span class="n">acls</span> <span class="o">=</span> <span class="n">buckets_acls_map</span><span class="p">[</span><span class="s1">&#39;acl&#39;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">acl_item</span> <span class="ow">in</span> <span class="n">acls</span><span class="p">:</span>
+                <span class="n">bucket_acl_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">acl_item</span><span class="p">)</span>
+
+                <span class="k">yield</span> <span class="p">{</span>
+                    <span class="s1">&#39;bucket&#39;</span><span class="p">:</span> <span class="n">buckets_acls_map</span><span class="p">[</span><span class="s1">&#39;bucket_name&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;domain&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;domain&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;entity&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;entity&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;entity_id&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;entityId&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;acl_id&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;project_team&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;projectTeam&#39;</span><span class="p">,</span> <span class="p">[])),</span>
+                    <span class="s1">&#39;role&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;bucket_acl_selflink&#39;</span><span class="p">:</span> <span class="n">acl_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;selfLink&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;raw_bucket_acl&#39;</span><span class="p">:</span> <span class="n">bucket_acl_json</span>
+                    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the project buckets acls from GCP.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Bucket acls as per-bucket dictionary.</span>
+<span class="sd">                Example: [{bucket_name: &#39;bucket name&#39;,</span>
+<span class="sd">                          acl: bucket_acls_json}]</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            LoadDataPipelineException: An error with loading data has occurred.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buckets_acls</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Get the projects for which we will retrieve the buckets.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_buckets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dao</span><span class="o">.</span><span class="n">get_raw_buckets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">dao_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">inventory_errors</span><span class="o">.</span><span class="n">LoadDataPipelineError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">raw_buckets</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_bucket_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raw_bucket&#39;</span><span class="p">))</span>
+                <span class="n">bucket_acls</span> <span class="o">=</span> <span class="n">raw_bucket_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;acl&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Invalid json: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">bucket_acls</span><span class="p">:</span>
+                <span class="n">buckets_acls</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;bucket_name&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bucket_id&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;acl&#39;</span><span class="p">:</span> <span class="n">bucket_acls</span>
+                <span class="p">})</span>
+        <span class="k">return</span> <span class="n">buckets_acls</span>
+
+<div class="viewcode-block" id="LoadProjectsBucketsAclsPipeline.run"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.inventory.pipelines.html#google.cloud.security.inventory.pipelines.load_projects_buckets_acls_pipeline.LoadProjectsBucketsAclsPipeline.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs the load buckets data pipeline.&quot;&quot;&quot;</span>
+        <span class="n">buckets_acls_maps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve</span><span class="p">()</span>
+
+        <span class="n">loadable_buckets_acls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">(</span><span class="n">buckets_acls_maps</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span> <span class="n">loadable_buckets_acls</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_loaded_count</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

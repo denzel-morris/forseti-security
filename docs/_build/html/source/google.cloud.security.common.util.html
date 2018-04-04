@@ -1,0 +1,503 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.util package &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="google-cloud-security-common-util-package">
+<h1>google.cloud.security.common.util package<a class="headerlink" href="#google-cloud-security-common-util-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-google.cloud.security.common.util.delay">
+<span id="google-cloud-security-common-util-delay-module"></span><h2>google.cloud.security.common.util.delay module<a class="headerlink" href="#module-google.cloud.security.common.util.delay" title="Permalink to this headline">¶</a></h2>
+<p>Tool used to delay initial execution of a function.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.delay.delay">
+<code class="descclassname">google.cloud.security.common.util.delay.</code><code class="descname">delay</code><span class="sig-paren">(</span><em>delay_by</em>, <em>clock=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/delay.html#delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.delay.delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delays execution of the decorated function.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">delay_by(int): Number of seconds to delay by.
+clock(time.sleep): Clock used to measure delay (mainly used for tests).</p>
+<blockquote class="last">
+<div>If none is provided clock will be created.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>function: Wrapped function.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.email_util">
+<span id="google-cloud-security-common-util-email-util-module"></span><h2>google.cloud.security.common.util.email_util module<a class="headerlink" href="#module-google.cloud.security.common.util.email_util" title="Permalink to this headline">¶</a></h2>
+<p>Email utility module.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.util.email_util.EmailUtil">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.util.email_util.</code><code class="descname">EmailUtil</code><span class="sig-paren">(</span><em>api_key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/email_util.html#EmailUtil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.email_util.EmailUtil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Utility for sending emails.</p>
+<dl class="classmethod">
+<dt id="google.cloud.security.common.util.email_util.EmailUtil.create_attachment">
+<em class="property">classmethod </em><code class="descname">create_attachment</code><span class="sig-paren">(</span><em>file_location</em>, <em>content_type</em>, <em>filename</em>, <em>disposition='attachment'</em>, <em>content_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/email_util.html#EmailUtil.create_attachment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.email_util.EmailUtil.create_attachment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a SendGrid attachment.</p>
+<p>SendGrid attachments file content must be base64 encoded.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>file_location (str): The path of the file.
+content_type (str): The content type of the attachment.
+filename (str): The filename of attachment.
+disposition (str): Content disposition, defaults to &#8220;attachment&#8221;.
+content_id (str): The content id.</dd>
+<dt>Returns:</dt>
+<dd>Attachment: A SendGrid Attachment.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="google.cloud.security.common.util.email_util.EmailUtil.render_from_template">
+<em class="property">classmethod </em><code class="descname">render_from_template</code><span class="sig-paren">(</span><em>template_file</em>, <em>template_vars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/email_util.html#EmailUtil.render_from_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.email_util.EmailUtil.render_from_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill out an email template with template variables.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">template_file (str): The location of email template in filesystem.
+template_vars (dict): The template variables to fill into the</p>
+<blockquote class="last">
+<div>template.</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>str: The template content, rendered with the provided variables.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.util.email_util.EmailUtil.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>email_sender=None</em>, <em>email_recipient=None</em>, <em>email_subject=None</em>, <em>email_content=None</em>, <em>content_type=None</em>, <em>attachment=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/email_util.html#EmailUtil.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.email_util.EmailUtil.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send an email.</p>
+<p>This uses the SendGrid API.
+<a class="reference external" href="https://github.com/sendgrid/sendgrid-python">https://github.com/sendgrid/sendgrid-python</a></p>
+<p>The minimum required info to send email are:
+sender, recipient, subject, and content (the body)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>email_sender (str): The email sender.
+email_recipient (str): The email recipient.
+email_subject (str): The email subject.
+email_content (str): The email content (aka, body).
+content_type (str): The email content type.
+attachment (Attachment): A SendGrid Attachment.</dd>
+<dt>Raises:</dt>
+<dd>EmailSendError: An error with sending email has occurred.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.errors">
+<span id="google-cloud-security-common-util-errors-module"></span><h2>google.cloud.security.common.util.errors module<a class="headerlink" href="#module-google.cloud.security.common.util.errors" title="Permalink to this headline">¶</a></h2>
+<p>Util Errors module.</p>
+<dl class="exception">
+<dt id="google.cloud.security.common.util.errors.EmailSendError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.util.errors.</code><code class="descname">EmailSendError</code><a class="reference internal" href="../_modules/google/cloud/security/common/util/errors.html#EmailSendError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.errors.EmailSendError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.util.errors.Error" title="google.cloud.security.common.util.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.util.errors.Error</span></code></a></p>
+<p>Unable to send email.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.util.errors.Error">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.util.errors.</code><code class="descname">Error</code><a class="reference internal" href="../_modules/google/cloud/security/common/util/errors.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.errors.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base error class for the module.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.util.errors.InvalidFileExtensionError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.util.errors.</code><code class="descname">InvalidFileExtensionError</code><a class="reference internal" href="../_modules/google/cloud/security/common/util/errors.html#InvalidFileExtensionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.errors.InvalidFileExtensionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.util.errors.Error" title="google.cloud.security.common.util.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.util.errors.Error</span></code></a></p>
+<p>No parser exists for the given file extension.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.util.errors.InvalidParserTypeError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.util.errors.</code><code class="descname">InvalidParserTypeError</code><a class="reference internal" href="../_modules/google/cloud/security/common/util/errors.html#InvalidParserTypeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.errors.InvalidParserTypeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.util.errors.Error" title="google.cloud.security.common.util.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.util.errors.Error</span></code></a></p>
+<p>No parser exists for the given parser type.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="google.cloud.security.common.util.errors.MetadataServerHttpError">
+<em class="property">exception </em><code class="descclassname">google.cloud.security.common.util.errors.</code><code class="descname">MetadataServerHttpError</code><a class="reference internal" href="../_modules/google/cloud/security/common/util/errors.html#MetadataServerHttpError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.errors.MetadataServerHttpError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#google.cloud.security.common.util.errors.Error" title="google.cloud.security.common.util.errors.Error"><code class="xref py py-class docutils literal"><span class="pre">google.cloud.security.common.util.errors.Error</span></code></a></p>
+<p>An error for handling HTTP errors with the metadata server.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.file_loader">
+<span id="google-cloud-security-common-util-file-loader-module"></span><h2>google.cloud.security.common.util.file_loader module<a class="headerlink" href="#module-google.cloud.security.common.util.file_loader" title="Permalink to this headline">¶</a></h2>
+<p>Utility functions for reading and parsing files in a variety of formats.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.file_loader.read_and_parse_file">
+<code class="descclassname">google.cloud.security.common.util.file_loader.</code><code class="descname">read_and_parse_file</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/file_loader.html#read_and_parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.file_loader.read_and_parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a json or yaml formatted file from a local path or GCS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>file_path (str): The full path to the file to read and parse.</dd>
+<dt>Returns:</dt>
+<dd>dict: The results of parsing the file.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.log_util">
+<span id="google-cloud-security-common-util-log-util-module"></span><h2>google.cloud.security.common.util.log_util module<a class="headerlink" href="#module-google.cloud.security.common.util.log_util" title="Permalink to this headline">¶</a></h2>
+<p>A basic util that wraps logging.</p>
+<p>Setup logging for Forseti Security. Logs to console and syslog.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.log_util.get_logger">
+<code class="descclassname">google.cloud.security.common.util.log_util.</code><code class="descname">get_logger</code><span class="sig-paren">(</span><em>module_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/log_util.html#get_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.log_util.get_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup the logger.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>module_name (str): The name of the mdule to describe the log entry.</dd>
+<dt>Returns:</dt>
+<dd>logger: An instance of the configured logger.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.util.log_util.set_logger_level">
+<code class="descclassname">google.cloud.security.common.util.log_util.</code><code class="descname">set_logger_level</code><span class="sig-paren">(</span><em>level</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/log_util.html#set_logger_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.log_util.set_logger_level" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Modify log level of existing loggers as well as the default</dt>
+<dd>for new loggers.</dd>
+<dt>Args:</dt>
+<dd>level (int): The log level to set the loggers to.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.util.log_util.set_logger_level_from_config">
+<code class="descclassname">google.cloud.security.common.util.log_util.</code><code class="descname">set_logger_level_from_config</code><span class="sig-paren">(</span><em>level_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/log_util.html#set_logger_level_from_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.log_util.set_logger_level_from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the logger level from a config value.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>level_name (str): The log level name. The accepted values are</dt>
+<dd>in the LOGLEVELS variable.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.metadata_server">
+<span id="google-cloud-security-common-util-metadata-server-module"></span><h2>google.cloud.security.common.util.metadata_server module<a class="headerlink" href="#module-google.cloud.security.common.util.metadata_server" title="Permalink to this headline">¶</a></h2>
+<p>Metadata server utilities.</p>
+<p>The metadata server is only accessible on GCE.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.metadata_server.can_reach_metadata_server">
+<code class="descclassname">google.cloud.security.common.util.metadata_server.</code><code class="descname">can_reach_metadata_server</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/metadata_server.html#can_reach_metadata_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.metadata_server.can_reach_metadata_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if we can reach the metadata server.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>bool: True if metadata server can be reached, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.util.metadata_server.get_value_for_attribute">
+<code class="descclassname">google.cloud.security.common.util.metadata_server.</code><code class="descname">get_value_for_attribute</code><span class="sig-paren">(</span><em>attribute</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/metadata_server.html#get_value_for_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.metadata_server.get_value_for_attribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given key return the value.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>attribute (str): Some metadata key.</dd>
+<dt>Returns:</dt>
+<dd>str: The value of the requested key, if key isn&#8217;t present then None.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.parser">
+<span id="google-cloud-security-common-util-parser-module"></span><h2>google.cloud.security.common.util.parser module<a class="headerlink" href="#module-google.cloud.security.common.util.parser" title="Permalink to this headline">¶</a></h2>
+<p>Utility functions for parsing various data.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.parser.format_timestamp">
+<code class="descclassname">google.cloud.security.common.util.parser.</code><code class="descname">format_timestamp</code><span class="sig-paren">(</span><em>timestamp_str</em>, <em>datetime_formatter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/parser.html#format_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.parser.format_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse and stringify a timestamp to a specified format.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>timestamp_str (str): A timestamp.
+datetime_formatter (str): A format string.</dd>
+<dt>Returns:</dt>
+<dd>str: The formatted, stringified timestamp.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.util.parser.json_stringify">
+<code class="descclassname">google.cloud.security.common.util.parser.</code><code class="descname">json_stringify</code><span class="sig-paren">(</span><em>obj_to_jsonify</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/parser.html#json_stringify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.parser.json_stringify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a python object to json string.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>obj_to_jsonify (dict): The object to json stringify.</dd>
+<dt>Returns:</dt>
+<dd>str: The json-stringified dict.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.util.parser.json_unstringify">
+<code class="descclassname">google.cloud.security.common.util.parser.</code><code class="descname">json_unstringify</code><span class="sig-paren">(</span><em>json_to_objify</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/parser.html#json_unstringify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.parser.json_unstringify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a json string to a python object.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>json_to_objify (str): The json string.
+default (object): The default value if no json string is passed in.</dd>
+<dt>Returns:</dt>
+<dd>object: The un-stringified object.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.common.util.parser.parse_member_info">
+<code class="descclassname">google.cloud.security.common.util.parser.</code><code class="descname">parse_member_info</code><span class="sig-paren">(</span><em>member</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/parser.html#parse_member_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.parser.parse_member_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse out the components of an IAM policy binding member.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>member (str): An IAM policy member, of the format</dt>
+<dd>&#8220;{membertype}:{email address}&#8221;.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>str: The member type.
+str: The name portion of the member.
+str: The domain of the member.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.regex_util">
+<span id="google-cloud-security-common-util-regex-util-module"></span><h2>google.cloud.security.common.util.regex_util module<a class="headerlink" href="#module-google.cloud.security.common.util.regex_util" title="Permalink to this headline">¶</a></h2>
+<p>Regex utility module.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.regex_util.escape_and_globify">
+<code class="descclassname">google.cloud.security.common.util.regex_util.</code><code class="descname">escape_and_globify</code><span class="sig-paren">(</span><em>pattern_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/regex_util.html#escape_and_globify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.regex_util.escape_and_globify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a pattern string with a glob, create actual regex pattern.</p>
+<p>To require &gt; 0 length glob, change the &#8220;*&#8221; to &#8221;.+&#8221;. This is to handle
+strings like &#8220;<a href="#id1"><span class="problematic" id="id2">*</span></a>&#64;company.com&#8221;. (The actual regex would probably be
+&#8221;.*&#64;company.com&#8221;, except that we don&#8217;t want to match zero-length
+usernames before the &#8220;&#64;&#8221;.)</p>
+<p>Special case the pattern &#8216;*&#8217; to match 0 or more characters.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>pattern_string (str): The pattern string of which to make a regex.</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>str: The pattern string, escaped except for the &#8220;*&#8221;, which is</dt>
+<dd>transformed into &#8221;.+&#8221; (match on one or more characters).</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.retryable_exceptions">
+<span id="google-cloud-security-common-util-retryable-exceptions-module"></span><h2>google.cloud.security.common.util.retryable_exceptions module<a class="headerlink" href="#module-google.cloud.security.common.util.retryable_exceptions" title="Permalink to this headline">¶</a></h2>
+<p>Module to determine whether an exception should be retried.</p>
+<dl class="function">
+<dt id="google.cloud.security.common.util.retryable_exceptions.is_retryable_exception">
+<code class="descclassname">google.cloud.security.common.util.retryable_exceptions.</code><code class="descname">is_retryable_exception</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/retryable_exceptions.html#is_retryable_exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.retryable_exceptions.is_retryable_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether exception should be retried.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>e (Exception): Exception object.</dd>
+<dt>Returns:</dt>
+<dd>bool: True for exceptions to retry. False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util.threadpool">
+<span id="google-cloud-security-common-util-threadpool-module"></span><h2>google.cloud.security.common.util.threadpool module<a class="headerlink" href="#module-google.cloud.security.common.util.threadpool" title="Permalink to this headline">¶</a></h2>
+<p>Thread pool implementation for async job distribution.</p>
+<dl class="class">
+<dt id="google.cloud.security.common.util.threadpool.Result">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.util.threadpool.</code><code class="descname">Result</code><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#Result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.Result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Used to communicate job result values and exceptions.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.util.threadpool.Result.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#Result.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.Result.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get value after worker has completed.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>object: The value.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.util.threadpool.Result.put">
+<code class="descname">put</code><span class="sig-paren">(</span><em>value</em>, <em>raised</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#Result.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.Result.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Worker puts value or exception into result.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>value (object): A value or exception.
+raised (bool): Whether exception was raised.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.util.threadpool.ThreadPool">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.util.threadpool.</code><code class="descname">ThreadPool</code><span class="sig-paren">(</span><em>num_workers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#ThreadPool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.ThreadPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>ThreadPool consumes tasks via queue.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.util.threadpool.ThreadPool.add_func">
+<code class="descname">add_func</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#ThreadPool.add_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.ThreadPool.add_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a callable to the queue.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>func (function): A callable.
+<a href="#id3"><span class="problematic" id="id4">*</span></a>args (list): Non-keyworded variable args.
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kargs (dict): Keyworded variable args.</dd>
+<dt>Returns:</dt>
+<dd>Result: The result.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="google.cloud.security.common.util.threadpool.ThreadPool.join">
+<code class="descname">join</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#ThreadPool.join"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.ThreadPool.join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns after completion of all pending callables.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="google.cloud.security.common.util.threadpool.Worker">
+<em class="property">class </em><code class="descclassname">google.cloud.security.common.util.threadpool.</code><code class="descname">Worker</code><span class="sig-paren">(</span><em>queue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.Worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<p>Thread executing callables from queue.</p>
+<dl class="method">
+<dt id="google.cloud.security.common.util.threadpool.Worker.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/common/util/threadpool.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.common.util.threadpool.Worker.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the worker.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.common.util">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-google.cloud.security.common.util" title="Permalink to this headline">¶</a></h2>
+<p>Common utilities usable by all service components.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">google.cloud.security.common.util package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.delay">google.cloud.security.common.util.delay module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.email_util">google.cloud.security.common.util.email_util module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.errors">google.cloud.security.common.util.errors module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.file_loader">google.cloud.security.common.util.file_loader module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.log_util">google.cloud.security.common.util.log_util module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.metadata_server">google.cloud.security.common.util.metadata_server module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.parser">google.cloud.security.common.util.parser module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.regex_util">google.cloud.security.common.util.regex_util module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.retryable_exceptions">google.cloud.security.common.util.retryable_exceptions module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util.threadpool">google.cloud.security.common.util.threadpool module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.common.util">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/google.cloud.security.common.util.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/source/google.cloud.security.common.util.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

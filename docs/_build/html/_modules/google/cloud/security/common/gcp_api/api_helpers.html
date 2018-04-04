@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.common.gcp_api.api_helpers &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.common.gcp_api.api_helpers</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Helper functions for API clients.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">oauth2client</span> <span class="kn">import</span> <span class="n">service_account</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.gcp_api</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">api_errors</span>
+
+
+<div class="viewcode-block" id="credential_from_keyfile"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.gcp_api.html#google.cloud.security.common.gcp_api.api_helpers.credential_from_keyfile">[docs]</a><span class="k">def</span> <span class="nf">credential_from_keyfile</span><span class="p">(</span><span class="n">keyfile_name</span><span class="p">,</span> <span class="n">scopes</span><span class="p">,</span> <span class="n">delegated_account</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build delegated credentials required for accessing the gsuite APIs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keyfile_name (str): The filename to load the json service account key</span>
+<span class="sd">            from.</span>
+<span class="sd">        scopes (list): The list of required scopes for the service account.</span>
+<span class="sd">        delegated_account (str): The account to delegate the service account to</span>
+<span class="sd">            use.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        OAuth2Credentials: Credentials as built by oauth2client.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        api_errors.ApiExecutionError: If fails to build credentials.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">credentials</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">service_account</span><span class="o">.</span><span class="n">ServiceAccountCredentials</span><span class="o">.</span><span class="n">from_json_keyfile_name</span><span class="p">(</span>
+                <span class="n">keyfile_name</span><span class="p">,</span> <span class="n">scopes</span><span class="o">=</span><span class="n">scopes</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">api_errors</span><span class="o">.</span><span class="n">ApiInitializationError</span><span class="p">(</span>
+            <span class="s1">&#39;Error building admin api credential: &#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">credentials</span><span class="o">.</span><span class="n">create_delegated</span><span class="p">(</span><span class="n">delegated_account</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="flatten_list_results"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.gcp_api.html#google.cloud.security.common.gcp_api.api_helpers.flatten_list_results">[docs]</a><span class="k">def</span> <span class="nf">flatten_list_results</span><span class="p">(</span><span class="n">paged_results</span><span class="p">,</span> <span class="n">item_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flatten a split-up list as returned by list_next() API.</span>
+
+<span class="sd">    GCE &#39;list&#39; APIs return results in the form:</span>
+<span class="sd">      {item_key: [...]}</span>
+<span class="sd">    with one dictionary for each &quot;page&quot; of results. This method flattens</span>
+<span class="sd">    that to a simple list of items.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        paged_results (list): A list of paged API response objects.</span>
+<span class="sd">            [{page 1 results}, {page 2 results}, {page 3 results}, ...]</span>
+<span class="sd">        item_key (str): The name of the key within the inner &quot;items&quot; lists</span>
+<span class="sd">            containing the objects of interest.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">paged_results</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item_key</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="flatten_aggregated_list_results"><a class="viewcode-back" href="../../../../../../source/google.cloud.security.common.gcp_api.html#google.cloud.security.common.gcp_api.api_helpers.flatten_aggregated_list_results">[docs]</a><span class="k">def</span> <span class="nf">flatten_aggregated_list_results</span><span class="p">(</span><span class="n">paged_results</span><span class="p">,</span> <span class="n">item_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flatten a split-up list as returned by GCE &quot;aggregatedList&quot; API.</span>
+
+<span class="sd">    The compute API&#39;s aggregatedList methods return a structure in</span>
+<span class="sd">    the form:</span>
+<span class="sd">      {</span>
+<span class="sd">        items: {</span>
+<span class="sd">          $group_value_1: {</span>
+<span class="sd">            $item_key: [$items]</span>
+<span class="sd">          },</span>
+<span class="sd">          $group_value_2: {</span>
+<span class="sd">            $item_key: [$items]</span>
+<span class="sd">          },</span>
+<span class="sd">          $group_value_3: {</span>
+<span class="sd">            &quot;warning&quot;: {</span>
+<span class="sd">              message: &quot;There are no results for ...&quot;</span>
+<span class="sd">            }</span>
+<span class="sd">          },</span>
+<span class="sd">          ...,</span>
+<span class="sd">          $group_value_n, {</span>
+<span class="sd">            $item_key: [$items]</span>
+<span class="sd">          },</span>
+<span class="sd">        }</span>
+<span class="sd">      }</span>
+<span class="sd">    where each &quot;$group_value_n&quot; is a particular element in the</span>
+<span class="sd">    aggregation, e.g. a particular zone or group or whatever, and</span>
+<span class="sd">    &quot;$item_key&quot; is some type-specific resource name, e.g.</span>
+<span class="sd">    &quot;backendServices&quot; for an aggregated list of backend services.</span>
+
+<span class="sd">    This method takes such a structure and yields a simple list of</span>
+<span class="sd">    all $items across all of the groups.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        paged_results (list): A list of paged API response objects.</span>
+<span class="sd">            [{page 1 results}, {page 2 results}, {page 3 results}, ...]</span>
+<span class="sd">        item_key (str): The name of the key within the inner &quot;items&quot; lists</span>
+<span class="sd">            containing the objects of interest.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">paged_results</span><span class="p">:</span>
+        <span class="n">aggregated_items</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;items&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">for</span> <span class="n">items_for_grouping</span> <span class="ow">in</span> <span class="n">aggregated_items</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items_for_grouping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item_key</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">items</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

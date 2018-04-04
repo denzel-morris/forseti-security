@@ -25,7 +25,8 @@ from setuptools.command.install import install
 
 import google.cloud.security
 
-FORSETI_VERSION = google.cloud.security.__version__
+# FORSETI_VERSION = google.cloud.security.__version__
+FORSETI_VERSION = '1.1.11'
 
 NAMESPACE_PACKAGES = [
     'google',

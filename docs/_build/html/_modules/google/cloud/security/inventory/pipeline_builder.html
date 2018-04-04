@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.inventory.pipeline_builder &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.inventory.pipeline_builder</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Builds the inventory pipelines to run, and in the correct order to run.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">anytree</span>
+
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.gcp_api</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">api_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">pipeline_requirements_map</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PipelineBuilder"><a class="viewcode-back" href="../../../../../source/google.cloud.security.inventory.html#google.cloud.security.inventory.pipeline_builder.PipelineBuilder">[docs]</a><span class="k">class</span> <span class="nc">PipelineBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inventory Pipeline Builder.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle_timestamp</span><span class="p">,</span> <span class="n">inventory_configs</span><span class="p">,</span> <span class="n">global_configs</span><span class="p">,</span>
+                 <span class="n">api_map</span><span class="p">,</span> <span class="n">dao_map</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the pipeline builder.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cycle_timestamp (str): Timestamp formatted as YYYYMMDDTHHMMSSZ.</span>
+<span class="sd">            inventory_configs (dict): Inventory configurations.</span>
+<span class="sd">            global_configs (dict): Global configurations.</span>
+<span class="sd">            api_map (dict): GCP API info, mapped to each resource.</span>
+<span class="sd">            dao_map (dict): DAO instances, mapped to each resource.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span> <span class="o">=</span> <span class="n">cycle_timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inventory_configs</span> <span class="o">=</span> <span class="n">inventory_configs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span> <span class="o">=</span> <span class="n">global_configs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_map</span> <span class="o">=</span> <span class="n">api_map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dao_map</span> <span class="o">=</span> <span class="n">dao_map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized_api_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_get_api</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the api instance for the pipeline.</span>
+
+<span class="sd">        The purpose is that we only want to initialize the APIs for the</span>
+<span class="sd">        pipelines that are enabled, in order to minimize setup.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            api_name (str): API name to get from the API map..</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: Instance of the API.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ApiInitializationError: The api client can not be created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialized_api_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">api</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">api_module_path</span> <span class="o">=</span> <span class="s1">&#39;google.cloud.security.common.gcp_api.{}&#39;</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">api_module_name</span> <span class="o">=</span> <span class="n">api_module_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">api_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api_name</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;module_name&#39;</span><span class="p">))</span>
+                <span class="n">api_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">api_module_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to get module </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">api_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">api_errors</span><span class="o">.</span><span class="n">ApiInitializationError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="n">api_class_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api_name</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;class_name&#39;</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">api_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">api_module</span><span class="p">,</span> <span class="n">api_class_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to instantiate </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                             <span class="n">api_class_name</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">raise</span> <span class="n">api_errors</span><span class="o">.</span><span class="n">ApiInitializationError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="n">api_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api_name</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">api_version</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">api</span> <span class="o">=</span> <span class="n">api_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">api</span> <span class="o">=</span> <span class="n">api_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">,</span>
+                                    <span class="n">version</span><span class="o">=</span><span class="n">api_version</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">api_errors</span><span class="o">.</span><span class="n">ApiInitializationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Failed to initialize API </span><span class="si">%s</span><span class="s1">, v=</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                             <span class="n">api_class_name</span><span class="p">,</span> <span class="n">api_version</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialized_api_map</span><span class="p">[</span><span class="n">api_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">api</span>
+
+        <span class="k">return</span> <span class="n">api</span>
+
+    <span class="k">def</span> <span class="nf">_find_runnable_pipelines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find the enabled pipelines to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            root (PipelineNode): Represents the top-level starting point</span>
+<span class="sd">                of the pipeline dependency tree. The entire pipeline</span>
+<span class="sd">                dependency tree are tuple of children PipelineNodes</span>
+<span class="sd">                of this root.</span>
+
+<span class="sd">                Example:</span>
+<span class="sd">                root.resource_name = &#39;organizations&#39;</span>
+<span class="sd">                root.enabled = True</span>
+<span class="sd">                root.parent = None</span>
+<span class="sd">                root.children = (pipeline_node1, pipeline_node2, ...)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of the pipelines that will be run. The</span>
+<span class="sd">                order in the list represents the order they need to be run.</span>
+<span class="sd">                i.e. going top-down in the dependency tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If child pipeline is true, then all parents will become true.</span>
+        <span class="c1"># Even if the parent(s) is(are) false.</span>
+        <span class="c1"># Manually traverse the parents since anytree walker api doesn&#39;t</span>
+        <span class="c1"># make sense.</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">anytree</span><span class="o">.</span><span class="n">iterators</span><span class="o">.</span><span class="n">PostOrderIter</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">enabled</span>
+                    <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Dependency tree of the pipelines: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">anytree</span><span class="o">.</span><span class="n">RenderTree</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">anytree</span><span class="o">.</span><span class="n">AsciiStyle</span><span class="p">())</span>
+                     <span class="o">.</span><span class="n">by_attr</span><span class="p">(</span><span class="s1">&#39;resource_name&#39;</span><span class="p">))</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Which pipelines are enabled: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">anytree</span><span class="o">.</span><span class="n">RenderTree</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">anytree</span><span class="o">.</span><span class="n">AsciiStyle</span><span class="p">())</span>
+                     <span class="o">.</span><span class="n">by_attr</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Now, we have the true state of whether a pipeline should be run.</span>
+        <span class="c1"># Get a list of pipeline instances that will actually be run.</span>
+        <span class="c1"># The order matters: must go top-down in the tree, by PreOrder.</span>
+        <span class="c1"># http://anytree.readthedocs.io/en/latest/apidoc/anytree.iterators.html</span>
+        <span class="n">runnable_pipelines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">anytree</span><span class="o">.</span><span class="n">iterators</span><span class="o">.</span><span class="n">PreOrderIter</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+                <span class="n">module_path</span> <span class="o">=</span> <span class="s1">&#39;google.cloud.security.inventory.pipelines.{}&#39;</span>
+                <span class="n">module_name</span> <span class="o">=</span> <span class="n">module_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">pipeline_requirements_map</span><span class="o">.</span><span class="n">REQUIREMENTS_MAP</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">resource_name</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;module_name&#39;</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to import </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Convert module naming to class naming.</span>
+                <span class="c1"># Module naming is &quot;this_is_foo&quot;</span>
+                <span class="c1"># Class naming is &quot;ThisIsFoo&quot;</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">pipeline_requirements_map</span><span class="o">.</span><span class="n">REQUIREMENTS_MAP</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">resource_name</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;module_name&#39;</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">title</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">pipeline_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to instantiate </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                 <span class="n">class_name</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">continue</span>
+
+                <span class="n">api_name</span> <span class="o">=</span> <span class="p">(</span><span class="n">pipeline_requirements_map</span><span class="o">.</span><span class="n">REQUIREMENTS_MAP</span>
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">resource_name</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;api_name&#39;</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_api</span><span class="p">(</span><span class="n">api_name</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">api_errors</span><span class="o">.</span><span class="n">ApiInitializationError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">dao</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dao_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">pipeline_requirements_map</span><span class="o">.</span><span class="n">REQUIREMENTS_MAP</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">resource_name</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dao_name&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">dao</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to find dao for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                 <span class="n">node</span><span class="o">.</span><span class="n">resource_name</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">pipeline</span> <span class="o">=</span> <span class="n">pipeline_class</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_configs</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">dao</span><span class="p">)</span>
+                <span class="n">runnable_pipelines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runnable_pipelines</span>
+
+    <span class="k">def</span> <span class="nf">_build_dependency_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build the dependency tree with all the pipeline nodes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PipelineNode: Represents the top-level starting point</span>
+<span class="sd">                of the pipeline dependency tree. The entire pipeline</span>
+<span class="sd">                dependency tree are children of this root.</span>
+
+<span class="sd">                Example:</span>
+<span class="sd">                root.resource_name = &#39;organizations&#39;</span>
+<span class="sd">                root.enabled = True</span>
+<span class="sd">                root.parent = None</span>
+<span class="sd">                root.children = (pipeline_node1, pipeline_node2, ...)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First pass: map all the pipelines to their own nodes,</span>
+        <span class="c1"># regardless if they should run or not.</span>
+        <span class="n">map_of_all_pipeline_nodes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">configured_pipelines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pipelines&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">configured_pipelines</span><span class="p">:</span>
+            <span class="n">map_of_all_pipeline_nodes</span><span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">PipelineNode</span><span class="p">(</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource&#39;</span><span class="p">),</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Another pass: build the dependency tree by setting the parents</span>
+        <span class="c1"># correctly on all the nodes.</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">configured_pipelines</span><span class="p">:</span>
+            <span class="n">parent_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pipeline_requirements_map</span><span class="o">.</span><span class="n">REQUIREMENTS_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource&#39;</span><span class="p">),</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;depends_on&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">parent_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">parent_node</span> <span class="o">=</span> <span class="n">map_of_all_pipeline_nodes</span><span class="p">[</span><span class="n">parent_name</span><span class="p">]</span>
+                <span class="n">map_of_all_pipeline_nodes</span><span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">parent_node</span><span class="p">)</span>
+
+        <span class="c1"># Assume root is organizations.</span>
+        <span class="k">return</span> <span class="n">map_of_all_pipeline_nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;organizations&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PipelineBuilder.build"><a class="viewcode-back" href="../../../../../source/google.cloud.security.inventory.html#google.cloud.security.inventory.pipeline_builder.PipelineBuilder.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build the pipelines to load data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of pipelines instances that will be run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dependency_tree</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_runnable_pipelines</span><span class="p">(</span><span class="n">root</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PipelineNode"><a class="viewcode-back" href="../../../../../source/google.cloud.security.inventory.html#google.cloud.security.inventory.pipeline_builder.PipelineNode">[docs]</a><span class="k">class</span> <span class="nc">PipelineNode</span><span class="p">(</span><span class="n">anytree</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">NodeMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A custom anytree node with pipeline attributes.</span>
+
+<span class="sd">    More info at anytree&#39;s documentation.</span>
+<span class="sd">    http://anytree.readthedocs.io/en/latest/apidoc/anytree.node.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the pipeline node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resource_name (str): Name of the resource.</span>
+<span class="sd">            enabled (bool): Whether the pipeline should run.</span>
+<span class="sd">            parent (PipelineNode): This node&#39;s parent.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resource_name</span> <span class="o">=</span> <span class="n">resource_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.inventory.inventory_loader &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for google.cloud.security.inventory.inventory_loader</h1><div class="highlight"><pre>
+<span class="c1"># Copyright 2017 The Forseti Security Authors. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Loads requested data into inventory.</span>
+
+<span class="sd">Usage:</span>
+<span class="sd">  $ forseti_inventory \\</span>
+<span class="sd">      --forseti_config (optional)</span>
+
+<span class="sd">To see all the dependent flags:</span>
+<span class="sd">  $ forseti_inventory --helpfull</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">gflags</span> <span class="kn">as</span> <span class="nn">flags</span>
+
+<span class="c1"># TODO: Investigate improving so we can avoid the pylint disable.</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="kn">from</span> <span class="nn">google.apputils</span> <span class="kn">import</span> <span class="n">app</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">appengine_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">backend_service_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">bucket_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">cloudsql_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">db_schema_version</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">data_access_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">firewall_rule_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">folder_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">forseti_system_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">forwarding_rules_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">instance_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">instance_group_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">instance_group_manager_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">instance_template_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">ke_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">organization_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">project_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access</span> <span class="kn">import</span> <span class="n">service_account_dao</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.data_access.sql_queries</span> <span class="kn">import</span> <span class="n">snapshot_cycles_sql</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.gcp_api</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">api_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">file_loader</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.common.util</span> <span class="kn">import</span> <span class="n">log_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">api_map</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">errors</span> <span class="k">as</span> <span class="n">inventory_errors</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">pipeline_builder</span> <span class="k">as</span> <span class="n">builder</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.inventory</span> <span class="kn">import</span> <span class="n">util</span> <span class="k">as</span> <span class="n">inventory_util</span>
+<span class="kn">from</span> <span class="nn">google.cloud.security.notifier</span> <span class="kn">import</span> <span class="n">notifier</span>
+<span class="c1"># pylint: enable=line-too-long</span>
+
+
+<span class="n">FLAGS</span> <span class="o">=</span> <span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
+
+<span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_boolean</span><span class="p">(</span><span class="s1">&#39;list_resources&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span>
+                     <span class="s1">&#39;List valid resources for inventory.&#39;</span><span class="p">)</span>
+
+<span class="c1"># Hack to make the test pass due to duplicate flag error here</span>
+<span class="c1"># and scanner, enforcer.</span>
+<span class="c1"># TODO: Find a way to remove this try/except, possibly dividing the tests</span>
+<span class="c1"># into different test suites.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span>
+        <span class="s1">&#39;forseti_config&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/home/ubuntu/forseti-security/configs/forseti_conf.yaml&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Fully qualified path and filename of the Forseti config file.&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">flags</span><span class="o">.</span><span class="n">DuplicateFlagError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># YYYYMMDDTHHMMSSZ, e.g. 20170130T192053Z</span>
+<span class="n">CYCLE_TIMESTAMP_FORMAT</span> <span class="o">=</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H%M%SZ&#39;</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">log_util</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_exists_snapshot_cycles_table</span><span class="p">(</span><span class="n">inventory_dao</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Whether the snapshot_cycles table exists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inventory_dao (data_access.Dao): Data access object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the snapshot cycle table exists. False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">SELECT_SNAPSHOT_CYCLES_TABLE</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">inventory_dao</span><span class="o">.</span><span class="n">execute_sql_with_fetch</span><span class="p">(</span>
+            <span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">data_access_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error in attempt to find snapshot_cycles table: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;TABLE_NAME&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;snapshot_cycles&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">_create_snapshot_cycles_table</span><span class="p">(</span><span class="n">inventory_dao</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create snapshot cycle table.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inventory_dao (data_access.Dao): Data access object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">CREATE_TABLE</span>
+        <span class="n">inventory_dao</span><span class="o">.</span><span class="n">execute_sql_with_commit</span><span class="p">(</span><span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span>
+                                              <span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">data_access_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to create snapshot cycles table: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_start_snapshot_cycle</span><span class="p">(</span><span class="n">inventory_dao</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Start snapshot cycle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inventory_dao (dao.Dao): Data access object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        datetime: Datetime object for the cycle_time, in UTC.</span>
+<span class="sd">        str: String of cycle_timestamp, formatted as YYYYMMDDTHHMMSSZ.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cycle_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+    <span class="n">cycle_timestamp</span> <span class="o">=</span> <span class="n">cycle_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">CYCLE_TIMESTAMP_FORMAT</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_exists_snapshot_cycles_table</span><span class="p">(</span><span class="n">inventory_dao</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snapshot_cycles is not created yet.&#39;</span><span class="p">)</span>
+        <span class="n">_create_snapshot_cycles_table</span><span class="p">(</span><span class="n">inventory_dao</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">INSERT_CYCLE</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="n">cycle_timestamp</span><span class="p">,</span> <span class="n">cycle_time</span><span class="p">,</span> <span class="s1">&#39;RUNNING&#39;</span><span class="p">,</span> <span class="n">db_schema_version</span><span class="p">)</span>
+        <span class="n">inventory_dao</span><span class="o">.</span><span class="n">execute_sql_with_commit</span><span class="p">(</span><span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span>
+                                              <span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">data_access_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to insert new snapshot cycle: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="c1"># Ensure all the tables are created, to support client usage &amp; joins,</span>
+    <span class="c1"># which expect the tables to exist even if empty.</span>
+    <span class="k">for</span> <span class="n">resource_name</span> <span class="ow">in</span> <span class="n">dao</span><span class="o">.</span><span class="n">CREATE_TABLE_MAP</span><span class="p">:</span>
+        <span class="n">inventory_dao</span><span class="o">.</span><span class="n">create_snapshot_table</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">cycle_timestamp</span><span class="p">)</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;All tables created.&#39;</span><span class="p">)</span>
+
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Inventory snapshot cycle started: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">cycle_timestamp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cycle_time</span><span class="p">,</span> <span class="n">cycle_timestamp</span>
+
+<span class="c1"># pylint: disable=broad-except</span>
+<span class="k">def</span> <span class="nf">_run_pipelines</span><span class="p">(</span><span class="n">pipelines</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run the pipelines to load data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pipelines (list): List of pipelines to be run.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: a list of booleans indicating whether each pipeline completed</span>
+<span class="sd">            successfully or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Define these status codes programmatically.</span>
+    <span class="n">run_statuses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pipeline</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Running pipeline </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;SUCCESS&#39;</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finished running </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="n">api_errors</span><span class="o">.</span><span class="n">ApiInitializationError</span><span class="p">,</span>
+                <span class="n">inventory_errors</span><span class="o">.</span><span class="n">LoadDataPipelineError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Encountered API error loading data.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                         <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;FAILURE&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Encountered error loading data.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span>
+                         <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;FAILURE&#39;</span>
+        <span class="n">run_statuses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;SUCCESS&#39;</span><span class="p">)</span>
+    <span class="n">_adjust_group_members_status</span><span class="p">(</span><span class="n">pipelines</span><span class="p">,</span> <span class="n">run_statuses</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">run_statuses</span>
+
+<span class="k">def</span> <span class="nf">_adjust_group_members_status</span><span class="p">(</span><span class="n">pipelines</span><span class="p">,</span> <span class="n">run_statuses</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adjust the `run_status` for the `group_members` pipeline if needed.</span>
+
+<span class="sd">    If the `groups` pipeline failed then the `group_members` pipeline</span>
+<span class="sd">    should be marked as a failure as well.</span>
+
+<span class="sd">    Please note: this function will modify the data passed to it directly</span>
+<span class="sd">    if/as needed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pipelines (list): List of pipelines that were run.</span>
+<span class="sd">        run_statuses (list): a list of booleans indicating whether each</span>
+<span class="sd">            pipeline completed successfully or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">RESOURCE_NAME</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pipelines</span><span class="p">))</span>
+    <span class="n">grps_idx</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;groups&#39;</span><span class="p">)</span>
+    <span class="n">grp_members_idx</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;group_members&#39;</span><span class="p">)</span>
+    <span class="c1"># Do nothing unless the status for both &#39;group_members&#39; and &#39;groups&#39; is</span>
+    <span class="c1"># present and the latter is `False`.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">grps_idx</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">grp_members_idx</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">run_statuses</span><span class="p">[</span><span class="n">grps_idx</span><span class="p">]):</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">run_statuses</span><span class="p">[</span><span class="n">grp_members_idx</span><span class="p">]:</span>
+        <span class="n">run_statuses</span><span class="p">[</span><span class="n">grp_members_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">pipelines</span><span class="p">[</span><span class="n">grp_members_idx</span><span class="p">]</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;FAILURE&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_complete_snapshot_cycle</span><span class="p">(</span><span class="n">inventory_dao</span><span class="p">,</span> <span class="n">cycle_timestamp</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Complete the snapshot cycle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inventory_dao (dao.Dao): Data access object.</span>
+<span class="sd">        cycle_timestamp (str): Timestamp, formatted as YYYYMMDDTHHMMSSZ.</span>
+<span class="sd">        status (str): The current cycle&#39;s status.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">complete_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">complete_time</span><span class="p">,</span> <span class="n">cycle_timestamp</span><span class="p">)</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">UPDATE_CYCLE</span>
+        <span class="n">inventory_dao</span><span class="o">.</span><span class="n">execute_sql_with_commit</span><span class="p">(</span><span class="n">snapshot_cycles_sql</span><span class="o">.</span><span class="n">RESOURCE_NAME</span><span class="p">,</span>
+                                              <span class="n">sql</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">data_access_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to complete update snapshot cycle: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Inventory load cycle completed with </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">status</span><span class="p">,</span> <span class="n">cycle_timestamp</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_create_dao_map</span><span class="p">(</span><span class="n">global_configs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a map of DAOs.</span>
+
+<span class="sd">    These will be reusable so that the db connection can apply across</span>
+<span class="sd">    different pipelines.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        global_configs (dict): Global configurations.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of DAOs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;appengine_dao&#39;</span><span class="p">:</span> <span class="n">appengine_dao</span><span class="o">.</span><span class="n">AppEngineDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;backend_service_dao&#39;</span><span class="p">:</span>
+                <span class="n">backend_service_dao</span><span class="o">.</span><span class="n">BackendServiceDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;bucket_dao&#39;</span><span class="p">:</span> <span class="n">bucket_dao</span><span class="o">.</span><span class="n">BucketDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;cloudsql_dao&#39;</span><span class="p">:</span> <span class="n">cloudsql_dao</span><span class="o">.</span><span class="n">CloudsqlDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;dao&#39;</span><span class="p">:</span> <span class="n">dao</span><span class="o">.</span><span class="n">Dao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;firewall_rule_dao&#39;</span><span class="p">:</span>
+                <span class="n">firewall_rule_dao</span><span class="o">.</span><span class="n">FirewallRuleDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;folder_dao&#39;</span><span class="p">:</span> <span class="n">folder_dao</span><span class="o">.</span><span class="n">FolderDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;forseti_system_dao&#39;</span><span class="p">:</span>
+                <span class="n">forseti_system_dao</span><span class="o">.</span><span class="n">ForsetiSystemDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;forwarding_rules_dao&#39;</span><span class="p">:</span>
+                <span class="n">forwarding_rules_dao</span><span class="o">.</span><span class="n">ForwardingRulesDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;ke_dao&#39;</span><span class="p">:</span> <span class="n">ke_dao</span><span class="o">.</span><span class="n">KeDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;instance_dao&#39;</span><span class="p">:</span> <span class="n">instance_dao</span><span class="o">.</span><span class="n">InstanceDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;instance_group_dao&#39;</span><span class="p">:</span>
+                <span class="n">instance_group_dao</span><span class="o">.</span><span class="n">InstanceGroupDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;instance_group_manager_dao&#39;</span><span class="p">:</span>
+                <span class="n">instance_group_manager_dao</span><span class="o">.</span><span class="n">InstanceGroupManagerDao</span><span class="p">(</span>
+                    <span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;instance_template_dao&#39;</span><span class="p">:</span>
+                <span class="n">instance_template_dao</span><span class="o">.</span><span class="n">InstanceTemplateDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;organization_dao&#39;</span><span class="p">:</span> <span class="n">organization_dao</span><span class="o">.</span><span class="n">OrganizationDao</span><span class="p">(</span>
+                <span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;project_dao&#39;</span><span class="p">:</span> <span class="n">project_dao</span><span class="o">.</span><span class="n">ProjectDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+            <span class="s1">&#39;service_account_dao&#39;</span><span class="p">:</span>
+                <span class="n">service_account_dao</span><span class="o">.</span><span class="n">ServiceAccountDao</span><span class="p">(</span><span class="n">global_configs</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="k">except</span> <span class="n">data_access_errors</span><span class="o">.</span><span class="n">MySQLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error to creating DAO map.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_cleanup_tables</span><span class="p">(</span><span class="n">inventory_configs</span><span class="p">,</span> <span class="n">dao_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clean up old inventory tables</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inventory_configs (dict): Inventory configuration</span>
+<span class="sd">        dao_map (dict): Lookup dict for DAO objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">retention_days</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">inventory_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;retention_days&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Retention period: </span><span class="si">%s</span><span class="s1"> days&#39;</span><span class="p">,</span> <span class="n">retention_days</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">retention_days</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">system_dao</span> <span class="o">=</span> <span class="n">dao_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;forseti_system_dao&#39;</span><span class="p">)</span>
+        <span class="n">system_dao</span><span class="o">.</span><span class="n">cleanup_inventory_tables</span><span class="p">(</span><span class="n">retention_days</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../../source/google.cloud.security.inventory.html#google.cloud.security.inventory.inventory_loader.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs the Inventory Loader.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _ (list): args that aren&#39;t used</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">del</span> <span class="n">_</span>
+    <span class="n">inventory_flags</span> <span class="o">=</span> <span class="n">FLAGS</span><span class="o">.</span><span class="n">FlagValuesDict</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">inventory_flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;list_resources&#39;</span><span class="p">):</span>
+        <span class="n">inventory_util</span><span class="o">.</span><span class="n">list_resource_pipelines</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="n">forseti_config</span> <span class="o">=</span> <span class="n">inventory_flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;forseti_config&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">forseti_config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Path to Forseti Security config needs to be specified.&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">file_loader</span><span class="o">.</span><span class="n">read_and_parse_file</span><span class="p">(</span><span class="n">forseti_config</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unable to open Forseti Security config file. &#39;</span>
+                     <span class="s1">&#39;Please check your path and filename and try again.&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+    <span class="n">global_configs</span> <span class="o">=</span> <span class="n">configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;global&#39;</span><span class="p">)</span>
+    <span class="n">inventory_configs</span> <span class="o">=</span> <span class="n">configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inventory&#39;</span><span class="p">)</span>
+
+    <span class="n">log_util</span><span class="o">.</span><span class="n">set_logger_level_from_config</span><span class="p">(</span><span class="n">inventory_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;loglevel&#39;</span><span class="p">))</span>
+
+    <span class="n">dao_map</span> <span class="o">=</span> <span class="n">_create_dao_map</span><span class="p">(</span><span class="n">global_configs</span><span class="p">)</span>
+
+    <span class="n">_cleanup_tables</span><span class="p">(</span><span class="n">inventory_configs</span><span class="p">,</span> <span class="n">dao_map</span><span class="p">)</span>
+
+    <span class="n">cycle_time</span><span class="p">,</span> <span class="n">cycle_timestamp</span> <span class="o">=</span> <span class="n">_start_snapshot_cycle</span><span class="p">(</span><span class="n">dao_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dao&#39;</span><span class="p">))</span>
+
+    <span class="n">pipeline_builder</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">PipelineBuilder</span><span class="p">(</span>
+        <span class="n">cycle_timestamp</span><span class="p">,</span>
+        <span class="n">inventory_configs</span><span class="p">,</span>
+        <span class="n">global_configs</span><span class="p">,</span>
+        <span class="n">api_map</span><span class="o">.</span><span class="n">API_MAP</span><span class="p">,</span>
+        <span class="n">dao_map</span><span class="p">)</span>
+    <span class="n">pipelines</span> <span class="o">=</span> <span class="n">pipeline_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+
+    <span class="n">run_statuses</span> <span class="o">=</span> <span class="n">_run_pipelines</span><span class="p">(</span><span class="n">pipelines</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">run_statuses</span><span class="p">):</span>
+        <span class="n">snapshot_cycle_status</span> <span class="o">=</span> <span class="s1">&#39;SUCCESS&#39;</span>
+    <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">run_statuses</span><span class="p">):</span>
+        <span class="n">snapshot_cycle_status</span> <span class="o">=</span> <span class="s1">&#39;PARTIAL_SUCCESS&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">snapshot_cycle_status</span> <span class="o">=</span> <span class="s1">&#39;FAILURE&#39;</span>
+
+    <span class="n">_complete_snapshot_cycle</span><span class="p">(</span><span class="n">dao_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dao&#39;</span><span class="p">),</span> <span class="n">cycle_timestamp</span><span class="p">,</span>
+                             <span class="n">snapshot_cycle_status</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_recipient&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;email_sender&#39;</span><span class="p">:</span> <span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_sender&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;email_recipient&#39;</span><span class="p">:</span> <span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_recipient&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;sendgrid_api_key&#39;</span><span class="p">:</span> <span class="n">global_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sendgrid_api_key&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;cycle_time&#39;</span><span class="p">:</span> <span class="n">cycle_time</span><span class="p">,</span>
+            <span class="s1">&#39;cycle_timestamp&#39;</span><span class="p">:</span> <span class="n">cycle_timestamp</span><span class="p">,</span>
+            <span class="s1">&#39;snapshot_cycle_status&#39;</span><span class="p">:</span> <span class="n">snapshot_cycle_status</span><span class="p">,</span>
+            <span class="s1">&#39;pipelines&#39;</span><span class="p">:</span> <span class="n">pipelines</span>
+        <span class="p">}</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;inventory_done&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="n">payload</span>
+        <span class="p">}</span>
+        <span class="n">notifier</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

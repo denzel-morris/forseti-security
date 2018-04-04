@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>google.cloud.security.notifier package &mdash; Forseti Security 1.1.11 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Forseti Security 1.1.11 documentation" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="google-cloud-security-notifier-package">
+<h1>google.cloud.security.notifier package<a class="headerlink" href="#google-cloud-security-notifier-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html">google.cloud.security.notifier.pipelines package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.base_email_notification_pipeline">google.cloud.security.notifier.pipelines.base_email_notification_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.base_notification_pipeline">google.cloud.security.notifier.pipelines.base_notification_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.cscc_pipeline">google.cloud.security.notifier.pipelines.cscc_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline">google.cloud.security.notifier.pipelines.email_inventory_snapshot_summary_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline">google.cloud.security.notifier.pipelines.email_scanner_summary_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.email_violations_pipeline">google.cloud.security.notifier.pipelines.email_violations_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.gcs_violations_pipeline">google.cloud.security.notifier.pipelines.gcs_violations_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines.slack_webhook_pipeline">google.cloud.security.notifier.pipelines.slack_webhook_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google.cloud.security.notifier.pipelines.html#module-google.cloud.security.notifier.pipelines">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-google.cloud.security.notifier.notifier">
+<span id="google-cloud-security-notifier-notifier-module"></span><h2>google.cloud.security.notifier.notifier module<a class="headerlink" href="#module-google.cloud.security.notifier.notifier" title="Permalink to this headline">¶</a></h2>
+<p>Notifier.</p>
+<p>Usage:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>$ forseti_notifier &#8211;db_host &lt;Cloud SQL database hostname/IP&gt; </dt>
+<dd>&#8211;db_user &lt;Cloud SQL database user&gt; &#8211;db_name &lt;Cloud SQL database name (required)&gt; &#8211;config &lt;Notification configuration&gt; &#8211;timestamp &lt;Snapshot timestamp to search for violations&gt;</dd>
+</dl>
+</div></blockquote>
+<dl class="function">
+<dt id="google.cloud.security.notifier.notifier.find_pipelines">
+<code class="descclassname">google.cloud.security.notifier.notifier.</code><code class="descname">find_pipelines</code><span class="sig-paren">(</span><em>pipeline_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/notifier.html#find_pipelines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.notifier.find_pipelines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the first class in the given sub module</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>pipeline_name (str): Name of the pipeline.</dd>
+<dt>Return:</dt>
+<dd>class: The class in the sub module</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.notifier.notifier.main">
+<code class="descclassname">google.cloud.security.notifier.notifier.</code><code class="descname">main</code><span class="sig-paren">(</span><em>_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/notifier.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.notifier.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>_ (obj): Result of the last expression evaluated in the interpreter.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.notifier.notifier.process">
+<code class="descclassname">google.cloud.security.notifier.notifier.</code><code class="descname">process</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/notifier.html#process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.notifier.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process messages about what notifications to send.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>message (dict): Message with payload in dict.</dt>
+<dd><p class="first">The payload will be different depending on the sender
+of the message.</p>
+<dl class="last docutils">
+<dt>Example:</dt>
+<dd><dl class="first last docutils">
+<dt>{&#8216;status&#8217;: &#8216;foobar_done&#8217;,</dt>
+<dd>&#8216;payload&#8217;: {}}</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="google.cloud.security.notifier.notifier.run_cscc_notification">
+<code class="descclassname">google.cloud.security.notifier.notifier.</code><code class="descname">run_cscc_notification</code><span class="sig-paren">(</span><em>notifier_configs</em>, <em>violations_as_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/google/cloud/security/notifier/notifier.html#run_cscc_notification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#google.cloud.security.notifier.notifier.run_cscc_notification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the first class in the given sub module</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>notifier_configs (dict): Notification configuration.
+violations_as_dict (tuple): Tuple of violations in dict format.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-google.cloud.security.notifier">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-google.cloud.security.notifier" title="Permalink to this headline">¶</a></h2>
+<p>Forseti Security Notifier.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">google.cloud.security.notifier package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier.notifier">google.cloud.security.notifier.notifier module</a></li>
+<li><a class="reference internal" href="#module-google.cloud.security.notifier">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/google.cloud.security.notifier.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, The Forseti Security Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/source/google.cloud.security.notifier.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
